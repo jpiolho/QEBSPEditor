@@ -20,6 +20,7 @@
         <RadzenPanelMenu>
             <RadzenPanelMenuItemClickable Text="Load..." Icon="file_upload" Click="OpenLoadDialogAsync" />
             <RadzenPanelMenuItemClickable Text="Save" Icon="file_download" Visible="@(_bsp is not null)" Click="SaveAsync" />
+            <RadzenPanelMenuItemClickable Text="About" Icon="contact_support" Click="() => AboutDialog.OpenAsync(DialogService)" />
         </RadzenPanelMenu>
     </RadzenSidebar>
 </RadzenLayout>

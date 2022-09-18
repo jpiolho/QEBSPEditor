@@ -1,0 +1,19 @@
+﻿<div>
+    <h1>QEBSPEditor</h1>
+    <div>Quake Enhanced BSP Editor</div>
+    <hr />
+
+    <div>Made by <a href="https://github.com/jpiolho" target="_blank">JPiolho</a></div>
+    <div><a href="https://github.com/jpiolho/QEBSPEditor/" target="_blank">Github Repository</a></div>
+</div>
+
+@code {
+    public static async Task OpenAsync(DialogService dialogService)
+    {
+        await dialogService.OpenAsync<AboutDialog>(
+            "About",
+            new(),
+            new() { ShowClose = true, CloseDialogOnEsc = true, CloseDialogOnOverlayClick = true }
+        );
+    }
+}

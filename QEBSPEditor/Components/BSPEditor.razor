@@ -1,0 +1,30 @@
+﻿@using QEBSPEditor.Models
+
+<RadzenTabs class="h-100" RenderMode="TabRenderMode.Server">
+    <Tabs>
+        <RadzenTabsItem Text="Entities">
+            <div class="d-flex h-100">
+                <RadzenTextArea @bind-Value="BSP.Entities" class="w-100 flex-1" Style="font-family: Consolas" />
+            </div>
+
+            @*<RadzenTabs class="h-100" RenderMode="TabRenderMode.Server">
+                <Tabs>
+                    <RadzenTabsItem Text="List">
+
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Raw">
+                        <div class="d-flex h-100">
+                            <RadzenTextArea @bind-Value="BSP.Entities" class="w-100 flex-1" Style="font-family: Consolas" />
+                        </div>
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>*@
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+
+
+@code {
+    [Parameter] public BSPFile BSP { get; set; } = null!;
+}

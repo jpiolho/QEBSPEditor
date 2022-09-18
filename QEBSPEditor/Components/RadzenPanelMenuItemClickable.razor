@@ -1,0 +1,41 @@
+﻿@inherits RadzenPanelMenuItem
+
+<RadzenPanelMenuItem 
+    Icon="@Icon"
+    Text="@Text"
+    ChildContent="@ChildContent"
+    ContextMenu="@ContextMenu"
+    Culture="@Culture"
+    Expanded="@Expanded"
+    ExpandedChanged="@ExpandedChanged"
+    Image="@Image"
+    MouseEnter="@MouseEnter"
+    MouseLeave="@MouseLeave"
+    Path="@Path"
+    Selected="@Selected"
+    Style="@Style"
+    Target="@Target"
+    Template="@Template"
+    Value="@Value"
+    Visible="@Visible"
+    @attributes="_attributes" />
+
+@code {
+    [Parameter] public EventCallback Click { get; set; }
+
+    private IReadOnlyDictionary<string, object> _attributes;
+
+    protected override void OnParametersSet()
+    {
+        var attributes = Attributes ?? Enumerable.Empty<KeyValuePair<string, object>>();
+
+        _attributes = new Dictionary<string, object>(
+            attributes.Append(KeyValuePair.Create<string,object>("onmouseup", ClickedAsync))
+        );
+    }
+
+    private async Task ClickedAsync(MouseEventArgs args) {
+        if (args.Button == 0)
+            await Click.InvokeAsync();
+    }
+}

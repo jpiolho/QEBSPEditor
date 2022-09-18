@@ -1,0 +1,50 @@
+﻿@using Blazor.DownloadFileFast.Interfaces
+@using QEBSPEditor.Models
+@using Tewr.Blazor.FileReader
+@inject DialogService DialogService
+@inject IFileReaderService FileReaderService
+@inject IBlazorDownloadFileService BlazorDownloadFileService
+
+<RadzenTooltip />
+<RadzenDialog />
+
+<RadzenLayout>
+    <RadzenBody>
+        @if (_bsp is not null)
+        {
+            <BSPEditor BSP="_bsp" />
+        }
+    </RadzenBody>
+    <RadzenSidebar>
+        <div class="text-center">QEBSPEditor</div>
+        <RadzenPanelMenu>
+            <RadzenPanelMenuItemClickable Text="Load..." Icon="file_upload" Click="OpenLoadDialogAsync" />
+            <RadzenPanelMenuItemClickable Text="Save" Icon="file_download" Visible="@(_bsp is not null)" Click="SaveAsync" />
+        </RadzenPanelMenu>
+    </RadzenSidebar>
+</RadzenLayout>
+
+
+
+@code {
+    private BSPFile? _bsp;
+
+    private async Task OpenLoadDialogAsync()
+    {
+        var bsp = await BSPLoadDialog.OpenAsync(DialogService);
+
+        if (bsp is not null) {
+            _bsp = bsp;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        using (var ms = new MemoryStream())
+        {
+            _bsp!.SaveToStream(ms);
+            await BlazorDownloadFileService.DownloadFileAsync("map.bsp", ms.ToArray());
+        }
+    }
+
+}

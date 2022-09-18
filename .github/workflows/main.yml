@@ -21,9 +21,10 @@ jobs:
       
       # publishes Blazor project to the release-folder
       - name: Publish .NET Core Project
+        working-directory: ./QEBSPEditor
         run: dotnet publish QEBSPEditor.csproj -c Release -o release --nologo
         
       - name: Commit wwwroot to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.4.0
         with:
-          folder: release/wwwroot
+          folder: ./QEBSPEditor/release/wwwroot

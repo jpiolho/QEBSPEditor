@@ -15,7 +15,7 @@ jobs:
       
       # sets up .NET Core SDK 6.0
       - name: Setup .NET Core SDK
-        uses: actions/setup-dotnet@v2.1.0
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.0.*
       
@@ -24,7 +24,12 @@ jobs:
         working-directory: ./QEBSPEditor
         run: dotnet publish QEBSPEditor.csproj -c Release -o release --nologo
         
-      - name: Commit wwwroot to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4.4.0
+      # build the pages artifact
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v3
         with:
-          folder: ./QEBSPEditor/release/wwwroot
+          path: ./QEBSPEditor/release/wwwroot
+        
+      # deploy pages
+      - name: Deploy GitHub Pages Site
+        uses: actions/deploy-pages@v1 

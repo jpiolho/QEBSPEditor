@@ -41,12 +41,20 @@ jobs:
         run: dotnet publish QEBSPEditor.csproj -c Release -o release --nologo
         
       # build the pages artifact
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v1.0.4
         with:
           path: ./QEBSPEditor/release/wwwroot
           
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
-      
+    

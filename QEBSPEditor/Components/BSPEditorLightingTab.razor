@@ -86,13 +86,21 @@
     private async Task SetMinimumLightAsync() {
         var light = (byte)Math.Round(_lightMinimum * 255);
 
+        var newLightmaps = new List<byte>(BSP.Lightmaps);
+
         foreach(var face in BSP.Faces) {
             if (face.TypeLight == 0xFF)
             {
                 face.TypeLight = 0;
-                face.BaseLight = (byte)(255 - light);
+                face.LightmapId = newLightmaps.Count;
+                for (var i = 0; i < 256; i++)
+                    newLightmaps.Add(light);
+
+
             }
         }
+
+        BSP.Lightmaps = newLightmaps.ToArray();
 
         for (var i = 0; i < BSP.Lightmaps.Length; i++)
         {

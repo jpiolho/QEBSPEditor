@@ -1,10 +1,17 @@
-﻿<div>
+﻿@inject ApplicationSettingsService ApplicationSettingsService
+
+<div>
     <h1>QEBSPEditor</h1>
     <div>Quake Enhanced BSP Editor</div>
     <hr />
 
     <div>Made by <a href="https://github.com/jpiolho" target="_blank">JPiolho</a></div>
     <div><a href="https://github.com/jpiolho/QEBSPEditor/" target="_blank">Github Repository</a></div>
+
+    <div class="mt-4">
+        <RadzenCheckBox Name="CheckboxTestingMode" @bind-Value="@ApplicationSettingsService.TestingMode" />
+        <RadzenLabel Text="Testing mode" Component="CheckboxTestingMode" Style="margin-left: 8px; vertical-align: middle;" />
+    </div>
 </div>
 
 @code {

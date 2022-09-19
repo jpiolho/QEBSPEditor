@@ -2,6 +2,7 @@ using CurrieTechnologies.Razor.SweetAlert2;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using QEBSPEditor;
+using QEBSPEditor.Services;
 using Radzen;
 using Tewr.Blazor.FileReader;
 
@@ -19,6 +20,7 @@ namespace QEBSPEditor
             builder.Services.AddBlazorDownloadFile();
             builder.Services.AddScoped<TooltipService>();
             builder.Services.AddScoped<DialogService>();
+            builder.Services.AddScoped<ApplicationSettingsService>();
             builder.Services.AddFileReaderService(options => options.UseWasmSharedBuffer = true);
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 

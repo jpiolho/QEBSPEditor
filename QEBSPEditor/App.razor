@@ -1,11 +1,12 @@
 ﻿@using Blazor.DownloadFileFast.Interfaces
+@using QEBSPEditor.Core
 @using QEBSPEditor.Models
 @using Tewr.Blazor.FileReader
 @inject DialogService DialogService
 @inject IFileReaderService FileReaderService
 @inject IBlazorDownloadFileService BlazorDownloadFileService
+@inject ApplicationSettingsService ApplicationSettingsService
 
-<RadzenTooltip />
 <RadzenDialog />
 
 <RadzenLayout>
@@ -30,11 +31,17 @@
 @code {
     private BSPFile? _bsp;
 
+    protected override void OnInitialized()
+    {
+        ApplicationSettingsService.Changed += (_,_) => StateHasChanged();
+    }
+
     private async Task OpenLoadDialogAsync()
     {
         var bsp = await BSPLoadDialog.OpenAsync(DialogService);
 
         if (bsp is not null) {
+            bsp.Entities = EntFormatter.Prettify(bsp.Entities);
             _bsp = bsp;
         }
     }

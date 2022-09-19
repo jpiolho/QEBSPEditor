@@ -1,0 +1,104 @@
+﻿@using CurrieTechnologies.Razor.SweetAlert2
+@using QEBSPEditor.Models
+@inject SweetAlertService Swal
+
+<div class="container-fluid">
+<div class="row">
+    <div class="col">
+        <RadzenText TextStyle="TextStyle.Body2" TagName="TagName.H3">Please note that lighting controls are for advanced users only</RadzenText>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <RadzenCard>
+            <div class="d-flex align-items-center">
+                Scale lighting
+                <InfoBubble Text="Scale all the lightmaps in the map by a percentage" />
+            </div>
+            <RadzenSlider TValue="float" Step="0.01" Min="0" Max="2" @bind-Value="_lightScale" Class="w-100" />
+            <RadzenButton class="mt-2" Text="@($"Scale ({_lightScale * 100f:0}%)")" Click="ScaleLighting" />
+        </RadzenCard>
+    </div>
+
+        <div class="col">
+            <RadzenCard>
+                <div class="d-flex align-items-center">
+                    Minimum light level
+                    <InfoBubble Text="Sets the minimum light levels for the whole map" />
+                </div>
+                <RadzenSlider TValue="float" Step="0.01" Min="0" Max="1" @bind-Value="_lightMinimum" Class="w-100" />
+                <RadzenButton class="mt-2" Text="@($"Scale ({_lightMinimum * 100f:0}%)")" Click="SetMinimumLightAsync" />
+            </RadzenCard>
+        </div>
+
+
+    @*<div class="col">
+        <RadzenCard>
+            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">
+                <div class="d-flex align-items-center">
+                    Set minimum light
+                    <InfoBubble Text="Sets the minimum light levels for a map. Although currently, faces that are pitch black will remain as such" />
+                </div>
+            </RadzenText>
+            <RadzenSlider Range="true" Step="0.01" TValue="IEnumerable<float>" Min="0" Max="1" @bind-Value="_lightRange" Class="w-100" />
+            <RadzenButton class="mt-2" Text="@($"Set ({(_lightRange.First() * 100f):0}% - {(_lightRange.Last() * 100f):0}%)")" Click="SetLightRangeAsync" />
+        </RadzenCard>
+    </div>*@
+</div>
+</div>
+
+@code {
+    [Parameter] public BSPFile BSP { get; set; } = null!;
+
+
+    private float _lightScale = 1f;
+    private float _lightMinimum = 0f;
+    private IEnumerable<float> _lightRange = null!;
+
+
+    protected override void OnParametersSet()
+    {
+        var min = byte.MaxValue;
+        var max = byte.MinValue;
+
+        for (var i = 0; i < BSP.Lightmaps.Length; i++)
+        {
+            var b = BSP.Lightmaps[i];
+            min = Math.Min(min, b);
+            max = Math.Max(max, b);
+        }
+
+        _lightRange = new float[] { min / 255f, max / 255f };
+    }
+
+    private async Task SetLightRangeAsync()
+    {
+        var min = Math.Round(255f * _lightRange.First());
+        var max = Math.Round(255f * _lightRange.Last());
+        for (var i = 0; i < BSP.Lightmaps.Length; i++)
+        {
+            BSP.Lightmaps[i] = (byte)Math.Clamp(BSP.Lightmaps[i], min, max);
+        }
+
+        await Swal.FireAsync("Success", $"The light range has been set between {(_lightRange.First() * 100f):0}% and {(_lightRange.Last() * 100f):0}%", SweetAlertIcon.Success);
+    }
+
+    private async Task SetMinimumLightAsync() {
+
+    }
+
+    private async Task ScaleLighting()
+    {
+        var percent = _lightScale / 100f;
+        for (var i = 0; i < BSP.Lightmaps.Length; i++)
+        {
+            var b = BSP.Lightmaps[i];
+            b = (byte)Math.Clamp(Math.Round(b * percent), 0, 255);
+            BSP.Lightmaps[i] = b;
+        }
+
+        await Swal.FireAsync("Success", $"The lightmap has been scaled to {_lightScale * 100f:0}%", SweetAlertIcon.Success);
+
+        _lightScale = 1f;
+    }
+}

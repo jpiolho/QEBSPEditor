@@ -1,0 +1,47 @@
+﻿@inherits Radzen.RadzenComponent
+@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
+
+<div @ref="_reference" class="d-inline-flex ml-1 @Class" @attributes="@Attributes">
+    <RadzenIcon Style="font-size:1em" Icon="info" IconStyle="IconStyle.Info" />
+</div>
+
+@code {
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public TooltipPosition Position { get; set; } = TooltipPosition.Top;
+
+    private ElementReference _reference;
+    private IJSObjectReference? _jsTooltip;
+    private bool _hadFirstRender = false;
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_hadFirstRender)
+            await UpdateTooltipAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _hadFirstRender = true;
+            await UpdateTooltipAsync();
+        }
+    }
+
+    private async Task UpdateTooltipAsync()
+    {
+        if (_jsTooltip is null)
+            _jsTooltip = await JSRuntime.InvokeAsync<IJSObjectReference>("attachTooltip", _reference, Text);
+        else
+            await JSRuntime.InvokeAsync<IJSObjectReference>("updateTooltip", _jsTooltip, Text);
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (_jsTooltip is not null)
+            await _jsTooltip.DisposeAsync();
+    }
+}

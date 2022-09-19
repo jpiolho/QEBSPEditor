@@ -4,12 +4,64 @@ namespace QEBSPEditor.Models
 {
     public class BSPFile
     {
+        private interface IBSPWriteable
+        {
+            void Write(BinaryWriter writer);
+        }
+
         private struct ChunkHeader
         {
             public const int SizeOf = sizeof(int) * 2;
 
             public int Offset { get; set; }
             public int Size { get; set; }
+        }
+
+        public class Face : IBSPWriteable
+        {
+            public const int SizeOf = (sizeof(ushort) * 4) + (sizeof(int) * 2) + (sizeof(byte) * 4);
+
+            public ushort PlaneId { get; set; }
+            public ushort Side { get; set; }
+            public int LEdgeId { get; set; }
+            public ushort LEdgeNum { get; set; }
+            public ushort TexInfoId { get; set; }
+            public byte TypeLight { get; set; }
+            public byte BaseLight { get; set; }
+            public byte Light1 { get; set; }
+            public byte Light2 { get; set; }
+            public int LightmapId { get; set; }
+
+            public static Face Read(BinaryReader reader)
+            {
+                return new Face()
+                {
+                    PlaneId = reader.ReadUInt16(),
+                    Side = reader.ReadUInt16(),
+                    LEdgeId = reader.ReadInt32(),
+                    LEdgeNum = reader.ReadUInt16(),
+                    TexInfoId = reader.ReadUInt16(),
+                    TypeLight = reader.ReadByte(),
+                    BaseLight = reader.ReadByte(),
+                    Light1 = reader.ReadByte(),
+                    Light2 = reader.ReadByte(),
+                    LightmapId = reader.ReadInt32()
+                };
+            }
+
+            public void Write(BinaryWriter writer)
+            {
+                writer.Write(PlaneId);
+                writer.Write(Side);
+                writer.Write(LEdgeId);
+                writer.Write(LEdgeNum);
+                writer.Write(TexInfoId);
+                writer.Write(TypeLight);
+                writer.Write(BaseLight);
+                writer.Write(Light1);
+                writer.Write(Light2);
+                writer.Write(LightmapId);
+            }
         }
 
         public string Entities { get; set; }
@@ -19,7 +71,7 @@ namespace QEBSPEditor.Models
         public byte[] Visilist { get; set; }
         public byte[] Nodes { get; set; }
         public byte[] TexInfo { get; set; }
-        public byte[] Faces { get; set; }
+        public List<Face> Faces { get; set; }
         public byte[] Lightmaps { get; set; }
         public byte[] ClipNodes { get; set; }
         public byte[] Leaves { get; set; }
@@ -87,7 +139,7 @@ namespace QEBSPEditor.Models
             file.Visilist = ReadGenericChunk(headerVisilist, file, reader);
             file.Nodes = ReadGenericChunk(headerNodes, file, reader);
             file.TexInfo = ReadGenericChunk(headerTexInfo, file, reader);
-            file.Faces = ReadGenericChunk(headerFaces, file, reader);
+            ReadFaceChunk(headerFaces, file, reader);
             file.Lightmaps = ReadGenericChunk(headerLightmaps, file, reader);
             file.ClipNodes = ReadGenericChunk(headerClipnodes, file, reader);
             file.Leaves = ReadGenericChunk(headerLeaves, file, reader);
@@ -113,11 +165,41 @@ namespace QEBSPEditor.Models
             file.Entities = Encoding.UTF8.GetString(reader.ReadBytes(header.Size-1));
         }
 
+        private static void ReadFaceChunk(ChunkHeader header, BSPFile file, BinaryReader reader)
+        {
+            reader.BaseStream.Seek(header.Offset, SeekOrigin.Begin);
+
+            var total = header.Size / Face.SizeOf;
+
+            var faces = new List<Face>(total);
+
+            for(var i=0;i<total;i++)
+                faces.Add(Face.Read(reader));
+
+            file.Faces = faces;
+        }
+
         private static ChunkHeader ReadChunkHeader(BinaryReader reader)
         {
             return new ChunkHeader() { Offset = reader.ReadInt32(), Size = reader.ReadInt32() };
         }
 
+        private static void WriteChunkAndHeader<TItem>(BinaryWriter writer, int headerNum,List<TItem> content) where TItem : IBSPWriteable
+        {
+            // Write content
+            writer.Seek(0, SeekOrigin.End);
+            var pos = writer.BaseStream.Position;
+            
+            foreach(var item in content)
+                item.Write(writer);
+
+            var length = writer.BaseStream.Position - pos;
+
+            // Write header
+            writer.Seek(sizeof(int) + (headerNum * ChunkHeader.SizeOf), SeekOrigin.Begin);
+            writer.Write((int)pos);
+            writer.Write((int)length);
+        }
         private static void WriteChunkAndHeader(BinaryWriter writer, int headerNum,byte[] content, byte[]? append = null)
         {
             int length = content.Length;

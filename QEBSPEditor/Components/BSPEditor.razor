@@ -1,25 +1,57 @@
-﻿@using QEBSPEditor.Models
+﻿@using CurrieTechnologies.Razor.SweetAlert2
+@using QEBSPEditor.Core
+@using QEBSPEditor.Models
+@inject ApplicationSettingsService ApplicationSettingsService
+@inject IJSRuntime JSRuntime
 
 <RadzenTabs class="h-100" RenderMode="TabRenderMode.Server">
     <Tabs>
         <RadzenTabsItem Text="Entities">
-            <div class="d-flex h-100">
-                <RadzenTextArea @bind-Value="BSP.Entities" class="w-100 flex-1" Style="font-family: Consolas" />
+
+            <div class="d-flex flex-column h-100">
+                    <RadzenCard>
+                        <RadzenMenu>
+                            <RadzenMenuItem Text="Add Entity" Icon="add_circle" Click="AddEntityAsync" />
+                            <RadzenMenuItem Text="Prettify" Icon="format_indent_increase" Click="() => BSP.Entities = EntFormatter.Prettify(BSP.Entities)" />
+                            <RadzenMenuItem Text="Minify" Icon="minimize" Click="() => BSP.Entities = EntFormatter.Minify(BSP.Entities)" />
+                        </RadzenMenu>
+                    </RadzenCard>
+                    <RadzenCard class="mt-2 flex-grow-1">
+                        @if (ApplicationSettingsService.TestingMode)
+                        {
+                            <MonacoEditor @ref="_monaco" @bind-Code="@BSP.Entities" />
+                        }
+                        else
+                        {
+                            <div class="d-flex h-100">
+                                <RadzenTextArea 
+                                    @ref="_area"
+                                    @bind-Value="BSP.Entities"
+                                    class="w-100 flex-1" Style="font-family: Consolas; white-space: pre; overflow-wrap: normal; overflow-x: scroll;" />
+                            </div>
+                        }
+                    </RadzenCard>
+          
             </div>
-
             @*<RadzenTabs class="h-100" RenderMode="TabRenderMode.Server">
-                <Tabs>
-                    <RadzenTabsItem Text="List">
+            <Tabs>
+            <RadzenTabsItem Text="List">
 
-                    </RadzenTabsItem>
-                    <RadzenTabsItem Text="Raw">
-                        <div class="d-flex h-100">
-                            <RadzenTextArea @bind-Value="BSP.Entities" class="w-100 flex-1" Style="font-family: Consolas" />
-                        </div>
-                    </RadzenTabsItem>
-                </Tabs>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Raw">
+            <div class="d-flex h-100">
+            <RadzenTextArea @bind-Value="BSP.Entities" class="w-100 flex-1" Style="font-family: Consolas" />
+            </div>
+            </RadzenTabsItem>
+            </Tabs>
             </RadzenTabs>*@
         </RadzenTabsItem>
+        @if (ApplicationSettingsService.TestingMode)
+        {
+            <RadzenTabsItem Text="Lighting">
+                <BSPEditorLightingTab BSP="BSP" />
+            </RadzenTabsItem>
+        }
     </Tabs>
 </RadzenTabs>
 
@@ -27,4 +59,33 @@
 
 @code {
     [Parameter] public BSPFile BSP { get; set; } = null!;
+
+    private RadzenTextArea _area;
+    private MonacoEditor _monaco;
+
+    private bool _preventKeyDownPropagation;
+    private bool _moveCaret = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_moveCaret)
+        {
+            if (!ApplicationSettingsService.TestingMode)
+            {
+                await JSRuntime.InvokeVoidAsync("setTextareaSelection", _area.Element, BSP.Entities.Length - 3);
+            }
+            else
+            {
+                var lineCount = BSP.Entities.Count(c => c == '\n'); // highly unefficient!
+                await _monaco.SetCursorPositionAsync(lineCount,16);
+            }
+
+            _moveCaret = false;
+        }
+    }
+
+    private async Task AddEntityAsync() {
+        BSP.Entities += "\n{\n  \"classname\" \"\"\n}";
+        _moveCaret = true;
+    }
 }

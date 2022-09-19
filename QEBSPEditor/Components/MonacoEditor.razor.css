@@ -1,0 +1,10 @@
+﻿.codeContainer {
+    all: initial;
+
+    display: block !important;
+    height: 100% !important;
+}
+
+.codeContainer * {
+    all: unset;
+}

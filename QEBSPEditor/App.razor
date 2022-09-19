@@ -41,7 +41,7 @@
         var bsp = await BSPLoadDialog.OpenAsync(DialogService);
 
         if (bsp is not null) {
-            bsp.Entities = EntFormatter.Prettify(bsp.Entities);
+            //bsp.Entities = EntFormatter.Prettify(bsp.Entities);
             _bsp = bsp;
         }
     }

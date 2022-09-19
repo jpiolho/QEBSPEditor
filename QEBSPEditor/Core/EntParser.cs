@@ -7,6 +7,7 @@ namespace QEBSPEditor.Core
         public enum Token
         {
             OpenEntity,
+            CloseEntity,
             
             OpenKey,
             Key,
@@ -16,7 +17,7 @@ namespace QEBSPEditor.Core
             Value,
             CloseValue,
 
-            CloseEntity
+            InlineComment,
         }
 
 
@@ -28,33 +29,62 @@ namespace QEBSPEditor.Core
             const int MODE_KEY = 2;
             const int MODE_INTERKEY = 3;
             const int MODE_VALUE = 4;
+            const int MODE_COMMENT = 5;
 
             var buffer = new StringBuilder();
-            int mode = 0;
             bool escape = false;
+
+            var stack = new Stack<int>();
+            stack.Push(MODE_ROOT);
+
             for (var i = 0; i < code.Length; i++)
             {
                 var c = code[i];
 
-                if (mode == MODE_ROOT)
+
+                var mode = stack.Peek();
+                
+                if(mode == MODE_ROOT || mode == MODE_INTERKEY || mode == MODE_ENTITY)
+                {
+                    if(c == '/' && (i < code.Length - 1 && code[i+1] == '/'))
+                    {
+                        i++;
+                        buffer.Clear();
+                        stack.Push(MODE_COMMENT);
+                        continue;
+                    }
+                }
+                
+                if(mode == MODE_COMMENT)
+                {
+                    if(c == '\r' || c == '\n')
+                    {
+                        stack.Pop();
+                        yield return (Token.InlineComment, buffer.ToString());
+                    }
+
+                    buffer.Append(c);
+                }
+                else if (mode == MODE_ROOT)
                 {
                     if (c == '{')
                     {
                         yield return (Token.OpenEntity, "{");
-                        mode = MODE_ENTITY;
+                        stack.Push(MODE_ENTITY);
                     }
                 }
                 else if (mode == MODE_ENTITY)
                 {
                     if (c == '"')
                     {
+                        buffer.Clear();
                         yield return (Token.OpenKey, "\"");
-                        mode = MODE_KEY;
+                        stack.Push(MODE_KEY);
                     }
                     else if (c == '}')
                     {
                         yield return (Token.CloseEntity, "}");
-                        mode = MODE_ROOT;
+                        stack.Pop();
                     }
                 }
                 else if (mode == MODE_KEY || mode == MODE_VALUE)
@@ -75,7 +105,8 @@ namespace QEBSPEditor.Core
                                 yield return (Token.CloseKey, "\"");
                                 
                                 buffer.Clear();
-                                mode = MODE_INTERKEY;
+                                stack.Pop();
+                                stack.Push(MODE_INTERKEY);
                             }
                             else if (mode == MODE_VALUE)
                             {
@@ -83,7 +114,7 @@ namespace QEBSPEditor.Core
                                 yield return (Token.CloseValue, "\"");
 
                                 buffer.Clear();
-                                mode = MODE_ENTITY;
+                                stack.Pop();
                             }
                         }
                         escape = false;
@@ -93,8 +124,11 @@ namespace QEBSPEditor.Core
                 {
                     if (c == '"')
                     {
+                        buffer.Clear();
                         yield return (Token.OpenValue, "\"");
-                        mode = MODE_VALUE;
+
+                        stack.Pop();
+                        stack.Push(MODE_VALUE);
                     }
                 }
             }

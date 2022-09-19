@@ -49,7 +49,8 @@ export function monacoCreate(csharp, container) {
 
 
                     whitespace: [
-                        [/[ \t\r\n]+/, '']
+                        [/[ \t\r\n]+/, ''],
+                        [/\/\/.*$/, 'comment']
                     ],
 
                     key: [

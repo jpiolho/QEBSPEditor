@@ -1,8 +1,4 @@
-﻿export function monacoSetCode(editor, code) {
-    editor.csharp.changing = true;
-    editor.setValue(code);
-    editor.csharp.changing = false;
-}
+﻿
 
 export function monacoSetCursor(editor, row, col) {
     editor.setPosition({
@@ -11,23 +7,12 @@ export function monacoSetCursor(editor, row, col) {
     });
     
     editor.revealLine(row);
-
-    /*
-    editor.setSelection({
-        startLineNumber: row,
-        endLineNumber: row,
-        startColumn: col,
-        endColumn: col+1
-    });
-    */
-
     editor.focus();
 }
 
-export function monacoCreate(csharp, container) {
+export function monacoInitialize() {
     return new Promise((resolve, reject) => {
         require(["vs/editor/editor.main"], async () => {
-
             monaco.languages.register({
                 id: 'bspent'
             });
@@ -74,27 +59,22 @@ export function monacoCreate(csharp, container) {
                     ]
                 }
             });
-
-            let editor = monaco.editor.create(container, {
-                value: await csharp.invokeMethodAsync("JSGetCode"),
-                language: 'bspent',
-                theme: 'vs',
-                automaticLayout: true
-            });
-
-            editor.onDidChangeModelContent(async function (e) {
-                if (editor.csharp.changing)
-                    return;
-
-                await csharp.invokeMethodAsync("JSSetCode", editor.getValue());
-            });
-
-
-
-            editor.csharp = {};
-            editor.csharp.reference = csharp;
-
-            resolve(editor);
+            resolve();
         });
+    });
+}
+
+export function monacoSetModelCode(model, code) {
+    model.surpressOnChange = true;
+    model.setValue(code);
+    model.surpressOnChange = false;
+}
+
+export function monacoHookupModel(csharp, model) {
+    model.onDidChangeContent(async (e) => {
+        if (model.surpressOnChange)
+            return;
+
+        await csharp.invokeMethodAsync("JSSetCode", model.getValue());
     });
 }

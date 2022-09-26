@@ -1,4 +1,5 @@
-﻿@inject IJSRuntime JSRuntime
+﻿@using QEBSPEditor.Core.Monaco
+@inject IJSRuntime JSRuntime
 @implements IDisposable
 @implements IAsyncDisposable
 
@@ -12,20 +13,40 @@
 </div>
 
 @code {
+
+
     [Parameter] public EventCallback<string?> CodeChanged { get; set; }
     [Parameter] public string? Code { get; set; }
+    [Parameter] public string? Theme { get; set; } = "vs";
+    [Parameter] public MonacoLanguageServer? LanguageServer { get; set; }
 
     private ElementReference? _container;
     private DotNetObjectReference<MonacoEditor>? _selfReference;
+    private IEnumerable<Marker>? _markers { get; set; }
 
     private IJSObjectReference? _editor;
     private IJSObjectReference? _module;
+
+    private string? _currentTheme;
+
+    private IJSObjectReference? _model;
 
     private bool _ignoreSetCode = false;
 
     protected override async Task OnInitializedAsync()
     {
+        // Import module
         _module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/monaco.js");
+
+        // Initialize monaco
+        await _module.InvokeVoidAsync("monacoInitialize");
+
+        // Create model
+        _model = await JSRuntime.InvokeAsync<IJSObjectReference>("monaco.editor.createModel", Code);
+        await JSRuntime.InvokeVoidAsync("monaco.editor.setModelLanguage", _model, "bspent");
+
+        _selfReference = DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync("monacoHookupModel", _selfReference, _model);
 
         if (_container != null)
             await CreateEditorAsync();
@@ -37,38 +58,65 @@
             await CreateEditorAsync();
     }
 
-    private async Task CreateEditorAsync() {
-        _selfReference = DotNetObjectReference.Create(this);
-        _editor = await _module!.InvokeAsync<IJSObjectReference>("monacoCreate", _selfReference, _container);
+    private async Task CreateEditorAsync()
+    {
+        _editor = await JSRuntime.InvokeAsync<IJSObjectReference>("monaco.editor.create", _container, new
+        {
+            model = _model,
+            theme = _currentTheme = Theme,
+            automaticLayout = true
+        });
+
+        if(LanguageServer != null) {
+            LanguageServer.Start(this);
+        }
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        if(_editor is not null && !_ignoreSetCode) {
-            await _module!.InvokeVoidAsync("monacoSetCode", _editor, Code);
+        if (_model is not null)
+        {
+            if (!_ignoreSetCode)
+                await _module!.InvokeVoidAsync("monacoSetModelCode", _model, Code);
+
+            await JSRuntime.InvokeVoidAsync("monaco.editor.setModelMarkers", _model, "owner", (_markers ?? Enumerable.Empty<Marker>()).ToArray());
+        }
+
+        if(Theme != _currentTheme && _editor is not null) {
+            await JSRuntime.InvokeVoidAsync("monaco.editor.setTheme", Theme);
+            _currentTheme = Theme;
         }
     }
 
-    public async Task SetCursorPositionAsync(int line, int col) {
+    public async Task SetCursorPositionAsync(int line, int col)
+    {
         await _module!.InvokeVoidAsync("monacoSetCursor", _editor, line, col);
+    }
+
+    public async Task SetMarkersAsync(IEnumerable<Marker> markers,CancellationToken cancellationToken) {
+        _markers = markers;
+
+        if(_model is not null)
+            await JSRuntime.InvokeVoidAsync("monaco.editor.setModelMarkers", cancellationToken, _model, "owner", (_markers ?? Enumerable.Empty<Marker>()).ToArray());
     }
 
     [JSInvokable]
     public string? JSGetCode() => Code;
     [JSInvokable]
     public async Task JSSetCode(string code) { Code = code; _ignoreSetCode = true; await CodeChanged.InvokeAsync(code); _ignoreSetCode = false; }
-    [JSInvokable]
-    public void JSSetEditorReference(IJSObjectReference reference) => _editor = reference;
 
-    async ValueTask IAsyncDisposable.DisposeAsync() {
-        if (_editor is not null) {
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (_editor is not null)
+        {
             await _editor.InvokeVoidAsync("dispose");
             await _editor.DisposeAsync();
         }
 
-        if(_module is not null) {
+        if (_module is not null)
             await _module.DisposeAsync();
-        }
+        if (_model is not null)
+            await _model.DisposeAsync();
     }
 
     void IDisposable.Dispose()

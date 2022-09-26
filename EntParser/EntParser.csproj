@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+	</PropertyGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Antlr4.Runtime.Standard" Version="4.11.1" />
+		<PackageReference Include="Antlr4BuildTasks" Version="11.4.0" PrivateAssets="all" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<Antlr4 Include="BSPEnt.g4" />
+	</ItemGroup>
+
+</Project>

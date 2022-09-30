@@ -1,5 +1,6 @@
 ﻿@using CurrieTechnologies.Razor.SweetAlert2
-@using QEBSPEditor.Models
+@using QEBSPEditor.Models;
+@using QEBSPEditor.Models.BSPFiles
 @inject SweetAlertService Swal
 
 <div class="container-fluid">
@@ -48,7 +49,7 @@
 </div>
 
 @code {
-    [Parameter] public BSPFile BSP { get; set; } = null!;
+    [Parameter] public IBSPFile BSP { get; set; } = null!;
 
 
     private float _lightScale = 1f;
@@ -76,7 +77,7 @@
     {
         _busy = true;
         StateHasChanged();
-        
+
 
         try
         {
@@ -110,23 +111,76 @@
 
             var newLightmaps = new List<byte>(BSP.Lightmaps);
 
-            int newLightId = -1;
-            foreach (var face in BSP.Faces)
+            switch (BSP)
             {
-                if (face.TypeLight == 0xFF)
-                {
-                    // Create a new lightmap range if it doesn't exist
-                    if (newLightId == -1)
+                case BSPFile29 bsp29:
                     {
-                        newLightId = newLightmaps.Count;
-                        for (var i = 0; i < 256; i++)
-                            newLightmaps.Add(light);
-                    }
+                        int newLightId = -1;
+                        foreach (var face in bsp29.Faces)
+                        {
+                            if (face.TypeLight == 0xFF)
+                            {
+                                // Create a new lightmap range if it doesn't exist
+                                if (newLightId == -1)
+                                {
+                                    newLightId = newLightmaps.Count;
+                                    for (var i = 0; i < 256; i++)
+                                        newLightmaps.Add(light);
+                                }
 
-                    face.TypeLight = 0;
-                    face.LightmapId = newLightId;
-                }
+                                face.TypeLight = 0;
+                                face.LightmapId = newLightId;
+                            }
+                        }
+                        break;
+                    }
+                case BSPFile2PSB bsp2psb:
+                    {
+                        int newLightId = -1;
+                        foreach (var face in bsp2psb.Faces)
+                        {
+                            if (face.TypeLight == 0xFF)
+                            {
+                                // Create a new lightmap range if it doesn't exist
+                                if (newLightId == -1)
+                                {
+                                    newLightId = newLightmaps.Count;
+                                    for (var i = 0; i < 256; i++)
+                                        newLightmaps.Add(light);
+                                }
+
+                                face.TypeLight = 0;
+                                face.LightmapId = newLightId;
+                            }
+                        }
+                        break;
+                    }
+                case BSPFileBSP2 bsp2:
+                    {
+                        int newLightId = -1;
+                        foreach (var face in bsp2.Faces)
+                        {
+                            if (face.TypeLight == 0xFF)
+                            {
+                                // Create a new lightmap range if it doesn't exist
+                                if (newLightId == -1)
+                                {
+                                    newLightId = newLightmaps.Count;
+                                    for (var i = 0; i < 256; i++)
+                                        newLightmaps.Add(light);
+                                }
+
+                                face.TypeLight = 0;
+                                face.LightmapId = newLightId;
+                            }
+                        }
+                        break;
+                    }
+                default:
+                    throw new InvalidOperationException("Unsupported BSP format");
             }
+
+
 
             BSP.Lightmaps = newLightmaps.ToArray();
 

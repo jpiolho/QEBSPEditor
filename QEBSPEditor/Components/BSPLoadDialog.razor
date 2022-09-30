@@ -1,4 +1,5 @@
 ﻿@using QEBSPEditor.Models
+@using QEBSPEditor.Models.BSPFiles
 @using Tewr.Blazor.FileReader
 @inject DialogService DialogService
 @inject IFileReaderService FileReaderService
@@ -45,12 +46,12 @@
             if (file is null)
                 return;
 
-            BSPFile bsp;
+            IBSPFile bsp;
             using (var memoryStream = await file.CreateMemoryStreamAsync(4096))
             {
                 try
                 {
-                    bsp = BSPFile.LoadFromStream(memoryStream);
+                    bsp = BSPFiles.Load(memoryStream);
                 }
                 catch (InvalidDataException ex)
                 {
@@ -73,8 +74,8 @@
         }
     }
 
-    public static async Task<BSPFile> OpenAsync(DialogService dialogService)
+    public static async Task<IBSPFile> OpenAsync(DialogService dialogService)
     {
-        return (BSPFile)await dialogService.OpenAsync<BSPLoadDialog>("Open bsp", new() { }, new() { CloseDialogOnEsc = true, ShowClose = true });
+        return (IBSPFile)await dialogService.OpenAsync<BSPLoadDialog>("Open bsp", new() { }, new() { CloseDialogOnEsc = true, ShowClose = true });
     }
 }

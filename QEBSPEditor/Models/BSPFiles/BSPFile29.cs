@@ -1,25 +1,12 @@
 ﻿using System.Text;
 
-namespace QEBSPEditor.Models
+namespace QEBSPEditor.Models.BSPFiles
 {
-    public class BSPFile
+    public class BSPFile29 : BSPFileBase, IBSPFile
     {
-        private interface IBSPWriteable
-        {
-            void Write(BinaryWriter writer);
-        }
-
-        private struct ChunkHeader
-        {
-            public const int SizeOf = sizeof(int) * 2;
-
-            public int Offset { get; set; }
-            public int Size { get; set; }
-        }
-
         public class Face : IBSPWriteable
         {
-            public const int SizeOf = (sizeof(ushort) * 4) + (sizeof(int) * 2) + (sizeof(byte) * 4);
+            public const int SizeOf = sizeof(ushort) * 4 + sizeof(int) * 2 + sizeof(byte) * 4;
 
             public ushort PlaneId { get; set; }
             public ushort Side { get; set; }
@@ -81,12 +68,12 @@ namespace QEBSPEditor.Models
         public byte[] Models { get; set; }
 
 
-        public void SaveToStream(Stream stream)
+        public void Save(Stream stream)
         {
             using var writer = new BinaryWriter(stream);
 
-            writer.Write((int)29);
-            for(var i=0;i< ChunkHeader.SizeOf * 15;i++)
+            writer.Write(29);
+            for (var i = 0; i < ChunkHeader.SizeOf * 15; i++)
                 writer.Write((byte)0);
 
             WriteChunkAndHeader(writer, 0, Encoding.UTF8.GetBytes(Entities), new byte[] { 0 });
@@ -106,7 +93,7 @@ namespace QEBSPEditor.Models
             WriteChunkAndHeader(writer, 14, Models);
         }
 
-        public static BSPFile LoadFromStream(Stream stream)
+        public IBSPFile Load(Stream stream)
         {
             using var reader = new BinaryReader(stream);
 
@@ -130,42 +117,36 @@ namespace QEBSPEditor.Models
             var headerLEdges = ReadChunkHeader(reader);
             var headerModels = ReadChunkHeader(reader);
 
-            BSPFile file = new BSPFile();
+            ReadEntityChunk(headerEntities, this, reader);
+            this.Planes = ReadGenericChunk(headerPlanes, reader);
+            this.MipTex = ReadGenericChunk(headerMiptex, reader);
+            this.Vertices = ReadGenericChunk(headerVertices, reader);
+            this.Visilist = ReadGenericChunk(headerVisilist, reader);
+            this.Nodes = ReadGenericChunk(headerNodes, reader);
+            this.TexInfo = ReadGenericChunk(headerTexInfo, reader);
+            ReadFaceChunk(headerFaces, this, reader);
+            this.Lightmaps = ReadGenericChunk(headerLightmaps, reader);
+            this.ClipNodes = ReadGenericChunk(headerClipnodes, reader);
+            this.Leaves = ReadGenericChunk(headerLeaves, reader);
+            this.LFace = ReadGenericChunk(headerLFace, reader);
+            this.Edges = ReadGenericChunk(headerEdges, reader);
+            this.LEdges = ReadGenericChunk(headerLEdges, reader);
+            this.Models = ReadGenericChunk(headerModels, reader);
 
-            ReadEntityChunk(headerEntities, file, reader);
-            file.Planes = ReadGenericChunk(headerPlanes, file, reader);
-            file.MipTex = ReadGenericChunk(headerMiptex, file, reader);
-            file.Vertices = ReadGenericChunk(headerVertices, file, reader);
-            file.Visilist = ReadGenericChunk(headerVisilist, file, reader);
-            file.Nodes = ReadGenericChunk(headerNodes, file, reader);
-            file.TexInfo = ReadGenericChunk(headerTexInfo, file, reader);
-            ReadFaceChunk(headerFaces, file, reader);
-            file.Lightmaps = ReadGenericChunk(headerLightmaps, file, reader);
-            file.ClipNodes = ReadGenericChunk(headerClipnodes, file, reader);
-            file.Leaves = ReadGenericChunk(headerLeaves, file, reader);
-            file.LFace = ReadGenericChunk(headerLFace, file, reader);
-            file.Edges = ReadGenericChunk(headerEdges, file, reader);
-            file.LEdges = ReadGenericChunk(headerLEdges, file, reader);
-            file.Models = ReadGenericChunk(headerModels, file, reader);
-
-            return file;
+            return this;
         }
 
 
-        private static byte[] ReadGenericChunk(ChunkHeader header, BSPFile file,BinaryReader reader)
-        {
-            reader.BaseStream.Seek(header.Offset, SeekOrigin.Begin);
-            return reader.ReadBytes(header.Size);
-        }
+        
 
-        private static void ReadEntityChunk(ChunkHeader header, BSPFile file, BinaryReader reader)
+        private static void ReadEntityChunk(ChunkHeader header, BSPFile29 file, BinaryReader reader)
         {
             reader.BaseStream.Seek(header.Offset, SeekOrigin.Begin);
 
-            file.Entities = Encoding.UTF8.GetString(reader.ReadBytes(header.Size-1));
+            file.Entities = Encoding.UTF8.GetString(reader.ReadBytes(header.Size - 1));
         }
 
-        private static void ReadFaceChunk(ChunkHeader header, BSPFile file, BinaryReader reader)
+        private static void ReadFaceChunk(ChunkHeader header, BSPFile29 file, BinaryReader reader)
         {
             reader.BaseStream.Seek(header.Offset, SeekOrigin.Begin);
 
@@ -173,52 +154,12 @@ namespace QEBSPEditor.Models
 
             var faces = new List<Face>(total);
 
-            for(var i=0;i<total;i++)
+            for (var i = 0; i < total; i++)
                 faces.Add(Face.Read(reader));
 
             file.Faces = faces;
         }
 
-        private static ChunkHeader ReadChunkHeader(BinaryReader reader)
-        {
-            return new ChunkHeader() { Offset = reader.ReadInt32(), Size = reader.ReadInt32() };
-        }
-
-        private static void WriteChunkAndHeader<TItem>(BinaryWriter writer, int headerNum,List<TItem> content) where TItem : IBSPWriteable
-        {
-            // Write content
-            writer.Seek(0, SeekOrigin.End);
-            var pos = writer.BaseStream.Position;
-            
-            foreach(var item in content)
-                item.Write(writer);
-
-            var length = writer.BaseStream.Position - pos;
-
-            // Write header
-            writer.Seek(sizeof(int) + (headerNum * ChunkHeader.SizeOf), SeekOrigin.Begin);
-            writer.Write((int)pos);
-            writer.Write((int)length);
-        }
-        private static void WriteChunkAndHeader(BinaryWriter writer, int headerNum,byte[] content, byte[]? append = null)
-        {
-            int length = content.Length;
-
-            // Write content
-            writer.Seek(0, SeekOrigin.End);
-            var pos = writer.BaseStream.Position;
-            writer.Write(content);
-            
-            if (append != null)
-            {
-                writer.Write(append);
-                length += append.Length;
-            }
-
-            // Write header
-            writer.Seek(sizeof(int) + (headerNum * ChunkHeader.SizeOf), SeekOrigin.Begin);
-            writer.Write((int)pos);
-            writer.Write((int)length);
-        }
+        
     }
 }

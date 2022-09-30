@@ -1,6 +1,7 @@
 ﻿@using Blazor.DownloadFileFast.Interfaces
 @using QEBSPEditor.Core
 @using QEBSPEditor.Models
+@using QEBSPEditor.Models.BSPFiles
 @using Tewr.Blazor.FileReader
 @inject DialogService DialogService
 @inject IFileReaderService FileReaderService
@@ -29,7 +30,7 @@
 
 
 @code {
-    private BSPFile? _bsp;
+    private IBSPFile? _bsp;
 
     protected override void OnInitialized()
     {
@@ -50,7 +51,7 @@
     {
         using (var ms = new MemoryStream())
         {
-            _bsp!.SaveToStream(ms);
+            _bsp!.Save(ms);
             await BlazorDownloadFileService.DownloadFileAsync("map.bsp", ms.ToArray());
         }
     }

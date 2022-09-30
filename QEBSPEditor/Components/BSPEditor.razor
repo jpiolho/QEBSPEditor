@@ -3,7 +3,7 @@
 @using QEBSPEditor.Core
 @using QEBSPEditor.Core.EntParsing
 @using QEBSPEditor.Core.Monaco
-@using QEBSPEditor.Models
+@using QEBSPEditor.Models.BSPFiles
 @inject ApplicationSettingsService ApplicationSettingsService
 @inject IJSRuntime JSRuntime
 
@@ -64,7 +64,7 @@
 
 
 @code {
-    [Parameter] public BSPFile BSP { get; set; } = null!;
+    [Parameter] public IBSPFile BSP { get; set; } = null!;
 
     private RadzenTextArea? _area;
     private MonacoEditor? _monaco;

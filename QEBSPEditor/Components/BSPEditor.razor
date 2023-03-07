@@ -12,7 +12,7 @@
         <RadzenTabsItem Text="Entities">
 
             <div class="d-flex flex-column h-100">
-                <RadzenCard>
+                <RadzenCard class="mt-2 flex-grow-1">
                     <RadzenMenu>
                         <RadzenMenuItem Text="Add Entity" Icon="add_circle" Click="AddEntityAsync" />
                         <RadzenMenuItem Text="Prettify" Icon="format_indent_increase" Click="() => BSP.Entities = EntTools.Prettify(BSP.Entities)" />
@@ -22,8 +22,7 @@
                             <RadzenMenuItem Text="Toggle Dark mode" Icon="dark_mode" Click="@(() => _monacoTheme = _monacoTheme == "vs" ? "vs-dark" : "vs")" />
                         }
                     </RadzenMenu>
-                </RadzenCard>
-                <RadzenCard class="mt-2 flex-grow-1">
+
                     @if (ApplicationSettingsService.TestingMode)
                     {
                         <MonacoEditor @ref="_monaco" @bind-Code="@BSP.Entities" LanguageServer="@_languageServer" Theme="@_monacoTheme" />

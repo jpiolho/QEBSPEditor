@@ -1,0 +1,70 @@
+﻿@using QEBSPEditor.Core.EntParsing;
+@using QEBSPEditor.Core.Monaco;
+@using QEBSPEditor.Models.BSPFiles;
+@inject ApplicationSettingsService ApplicationSettingsService
+@inject IJSRuntime JSRuntime
+
+<div class="d-flex flex-column h-100">
+    <RadzenCard class="mt-2 flex-grow-1">
+        <RadzenMenu>
+            <RadzenMenuItem Text="Add Entity" Icon="add_circle" Click="AddEntityAsync" />
+            <RadzenMenuItem Text="Prettify" Icon="format_indent_increase" Click="() => BSP.Entities = EntTools.Prettify(BSP.Entities)" />
+            <RadzenMenuItem Text="Minify" Icon="minimize" Click="() => BSP.Entities = EntTools.Minify(BSP.Entities)" />
+            @if (ApplicationSettingsService.TestingMode)
+            {
+                <RadzenMenuItem Text="Toggle Dark mode" Icon="dark_mode" Click="@(() => _monacoTheme = _monacoTheme == "vs" ? "vs-dark" : "vs")" />
+            }
+        </RadzenMenu>
+
+        @if (ApplicationSettingsService.TestingMode)
+        {
+            <MonacoEditor @ref="_monaco" @bind-Code="@BSP.Entities" LanguageServer="@_languageServer" Theme="@_monacoTheme" />
+        }
+        else
+        {
+            <div class="d-flex h-100">
+                <RadzenTextArea @ref="_area"
+                            @bind-Value="BSP.Entities"
+                            class="w-100 flex-1" Style="font-family: Consolas; white-space: pre; overflow-wrap: normal; overflow-x: scroll;" />
+            </div>
+        }
+    </RadzenCard>
+
+</div>
+
+@code {
+    [Parameter] public IBSPFile BSP { get; set; } = null!;
+
+    private RadzenTextArea? _area;
+    private MonacoEditor? _monaco;
+    private BSPEntMonacoLanguageServer? _languageServer = new BSPEntMonacoLanguageServer();
+    private string _monacoTheme = "vs";
+
+    private bool _preventKeyDownPropagation;
+    private bool _moveCaret = false;
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_moveCaret)
+        {
+            if (!ApplicationSettingsService.TestingMode)
+            {
+                await JSRuntime.InvokeVoidAsync("setTextareaSelection", _area.Element, BSP.Entities.Length - 3);
+            }
+            else
+            {
+                var lineCount = BSP.Entities.Count(c => c == '\n'); // highly unefficient!
+                await _monaco.SetCursorPositionAsync(lineCount, 16);
+            }
+
+            _moveCaret = false;
+        }
+    }
+
+    private async Task AddEntityAsync()
+    {
+        BSP.Entities += "\n{\n  \"classname\" \"\"\n}";
+        _moveCaret = true;
+    }
+}

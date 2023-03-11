@@ -135,13 +135,17 @@ public class QuickEntParser : IEntParser
                         }
                         else if (mode == Modes.Value)
                         {
-                            yield return ParseToken.Create(TokenType.Key, position, buffer);
+                            yield return ParseToken.Create(TokenType.Value, position, buffer);
                             yield return ParseToken.Create(TokenType.CloseValue, position, "\"");
 
                             buffer.Clear();
                             stack.Pop();
                         }
                     }
+                    escape = false;
+                }
+                else
+                {
                     escape = false;
                 }
             }

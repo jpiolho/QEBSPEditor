@@ -20,8 +20,4 @@
 		<Folder Include="Shared\" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\EntParser\EntParser.csproj" />
-	</ItemGroup>
-
 </Project>

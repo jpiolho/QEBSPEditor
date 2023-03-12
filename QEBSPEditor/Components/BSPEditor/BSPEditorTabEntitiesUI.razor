@@ -1,0 +1,84 @@
+﻿@using CurrieTechnologies.Razor.SweetAlert2;
+@using QEBSPEditor.Core.EntParsing;
+@using QEBSPEditor.Models.BSPFiles;
+@inject ILogger<BSPEditorTabEntitiesUI> Logger
+
+<PromptDialogs @ref="_dialogs" />
+
+<RadzenDataGrid @ref="_table" TItem="Entity"
+                Data="_entities"
+                IsLoading="_entities is null"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true"
+                AllowColumnPicking="true"
+                AllowColumnResize="true">
+    <Columns>
+        <RadzenDataGridColumn TItem="Entity" Visible="false" Title="#" Sortable="false" Filterable="false">
+            <Template>
+                @(_entities!.IndexOf(context) + 1)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Entity" Title="Classname" Property="@nameof(Entity.Classname)" />
+        <RadzenDataGridColumn TItem="Entity" Title="Targetname" Property="@nameof(Entity.Targetname)" />
+        <RadzenDataGridColumn TItem="Entity" Title="Origin" Sortable="false" Filterable="false" Property="@nameof(Entity.Origin)" >
+            <Template>
+                @{
+                    var origin = context.Origin;
+
+                    if (origin.HasValue)
+                    {
+                        var val = origin.Value;
+                        @($"{val.X} {val.Y} {val.Z}")
+                    }
+                }
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Entity" Title="Actions" Sortable="false" Filterable="false">
+            <Template>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Wrap="FlexWrap.Wrap">
+                    @*<RadzenButton Text="Edit" ButtonStyle="ButtonStyle.Secondary" />*@
+                    <RadzenButton Text="Delete" ButtonStyle="ButtonStyle.Danger" Click="() => DeleteEntityAsync(context)" />
+                </RadzenStack>
+            </Template>
+        </RadzenDataGridColumn>
+
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    [Parameter] public IBSPFile BSP { get; set; } = null!;
+
+    private List<Entity>? _entities;
+    private RadzenDataGrid<Entity>? _table;
+    private PromptDialogs? _dialogs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _entities = await Task.Run(() => QuickEntParser.ParseEntities(BSP.Entities));
+    }
+
+    private async Task DeleteEntityAsync(Entity entity)
+    {
+        var targetname = entity.Targetname;
+
+        string entityDisplayName = $"'{entity.Classname}'{(targetname is not null ? $" ({targetname})" : "")}";
+
+        if (!await _dialogs!.ConfirmAsync("Delete entity?", $"Are you sure you want to delete {entityDisplayName}?"))
+            return;
+
+        // Remove it from the source code
+        if (entity.SourceHint is not null)
+        {
+            BSP.Entities = BSP.Entities.Substring(0, entity.SourceHint.OffsetStart) + BSP.Entities.Substring(entity.SourceHint.OffsetEnd);
+        }
+
+        _entities!.Remove(entity);
+
+        // Update the table
+        _table?.Reload();
+
+        await _dialogs!.SuccessAsync("Entity deleted", $"The entity {entityDisplayName} was deleted!");
+    }
+}

@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using QEBSPEditor.Models;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace QEBSPEditor.Core.EntParsing;
@@ -31,7 +33,7 @@ public class QuickEntParser : IEntParser
 
     public bool Next([NotNullWhen(true)] out ParseToken? token, out ParseError? error)
     {
-        if(_parser.MoveNext())
+        if (_parser.MoveNext())
         {
             token = _parser.Current;
             error = null;
@@ -41,6 +43,58 @@ public class QuickEntParser : IEntParser
         token = null;
         error = null;
         return false;
+    }
+
+    public bool NextEntity([NotNullWhen(true)] out Entity? entity, out ParseError? error)
+    {
+        entity = null;
+
+        string? keyBuffer = null;
+        while(Next(out var token, out error))
+        {
+            if (error != null)
+                return false;
+
+            switch (token.Type)
+            {
+                case TokenType.OpenEntity:
+                    entity = new Entity()
+                    {
+                        SourceHint = new()
+                        {
+                            OffsetStart = token.Offset
+                        }
+                    };
+                    break;
+                case TokenType.CloseEntity:
+                    entity!.SourceHint!.OffsetEnd = token.Offset + 1;
+                    return true;
+
+                case TokenType.Key:
+                    keyBuffer = token.Value;
+                    break;
+                case TokenType.Value:
+                    entity!.SetKeyValue(keyBuffer!, token.Value!);
+                    keyBuffer = null;
+                    break;
+            }
+        }
+
+
+        return false;
+    }
+
+    public static List<Entity> ParseEntities(string code)
+    {
+        var parser = new QuickEntParser(code);
+        parser.Start();
+
+        var entities = new List<Entity>();
+
+        while(parser.NextEntity(out var entity, out _))
+            entities.Add(entity);
+
+        return entities;
     }
 
     private IEnumerable<ParseToken> Parse(string code)
@@ -58,6 +112,7 @@ public class QuickEntParser : IEntParser
 
         for (var i = 0; i < code.Length; i++)
         {
+            position.Offset = i;
             var c = code[i];
 
             position.Column++;
@@ -162,5 +217,5 @@ public class QuickEntParser : IEntParser
             }
         }
     }
-    
+
 }

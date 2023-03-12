@@ -9,6 +9,51 @@ public static class EntTools
 {
     public static string Prettify(string code)
     {
+        /*
+        var sb = new StringBuilder();
+
+        var tokens = CSLYEntParser.Tokenize(code);
+
+        bool isValue = false;
+        bool insideEntity = false;
+        foreach(var token in tokens)
+        {
+            if(token.TokenID == CSLYEntParser.EntitiesTokens.OPEN_BRACKET)
+            {
+                sb.AppendLine("{");
+                insideEntity = true;
+            }
+            else if(token.TokenID == CSLYEntParser.EntitiesTokens.STRING)
+            {
+                if(!isValue)
+                {
+                    sb.Append($"  {token.Value}");
+                    isValue = true;
+                }
+                else
+                {
+                    sb.AppendLine($" {token.Value}");
+                    isValue = false;
+                }
+            }
+            else if(token.TokenID == CSLYEntParser.EntitiesTokens.COMMENT)
+            {
+                if (insideEntity)
+                    sb.Append("  ");
+
+                sb.Append(token.Value);
+            }
+            else if(token.TokenID == CSLYEntParser.EntitiesTokens.CLOSE_BRACKET)
+            {
+                insideEntity = false;
+                sb.AppendLine("}");
+            }
+        }
+
+
+        return sb.ToString();
+        */
+
         var sb = new StringBuilder();
 
         var parser = new QuickEntParser(code);

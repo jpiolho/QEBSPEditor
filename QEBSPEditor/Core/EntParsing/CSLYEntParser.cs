@@ -13,7 +13,7 @@ namespace QEBSPEditor.Core.EntParsing
 
         public enum EntitiesTokens
         {
-            [Lexeme("(\\\")([^(\\\")]*)(\\\")")]
+            [Lexeme("([\"'])((\\\\{2})*|(.*?[^\\\\](\\\\{2})*))\\1")]
             STRING,
 
             [Lexeme("\\{")]
@@ -25,8 +25,12 @@ namespace QEBSPEditor.Core.EntParsing
             [Lexeme("//.*\n")]
             COMMENT,
 
-            [Lexeme("[ \t\r\n]+", isSkippable: true)]
+            
+            [Lexeme("[ \\t]+", isSkippable: true)]
             WHITESPACE,
+
+            [Lexeme("[\\r\\n]+", isSkippable: true, isLineEnding: true)]
+            NEW_LINE
         }
 
         private class EntitiesParser
@@ -34,7 +38,7 @@ namespace QEBSPEditor.Core.EntParsing
             [Production("keyvalue: STRING STRING")]
             public KeyValuePair<string,string> KeyValue(Token<EntitiesTokens> key, Token<EntitiesTokens> value)
             {
-                return new KeyValuePair<string, string>(key.Value.Trim(), value.Value);
+                return new KeyValuePair<string, string>(key.Value.Trim('"').Trim(), value.Value.Trim('"'));
             }
 
             [Production("entity: OPEN_BRACKET[d] keyvalue* CLOSE_BRACKET[d]")]
@@ -53,6 +57,19 @@ namespace QEBSPEditor.Core.EntParsing
             }
         }
 
+        public static List<Entity> Parse(string content)
+        {
+            var parserInstance = new EntitiesParser();
+            var builder = new ParserBuilder<EntitiesTokens, object>();
+            var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "entities").Result;
+
+            var result = parser.Parse(content);
+
+            if (result.IsError)
+                throw new AggregateException(result.Errors.Select(err => new Exception($"Parsing error: {err}")));
+
+            return (List<Entity>)result.Result;
+        }
 
         public static TokenChannels<EntitiesTokens> Tokenize(string content)
         {
@@ -62,7 +79,7 @@ namespace QEBSPEditor.Core.EntParsing
             
             var tokens = parser.Lexer.Tokenize(content);
 
-            if (!tokens.IsOk)
+            if (tokens.IsError)
                 throw new Exception(tokens.Error.ToString());
 
             return tokens.Tokens;

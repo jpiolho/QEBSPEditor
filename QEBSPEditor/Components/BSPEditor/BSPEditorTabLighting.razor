@@ -1,7 +1,8 @@
 ﻿@using CurrieTechnologies.Razor.SweetAlert2
 @using QEBSPEditor.Models;
 @using QEBSPEditor.Models.BSPFiles
-@inject SweetAlertService Swal
+
+<PromptDialogs @ref="_dialogs" />
 
 <div class="container-fluid">
     <div class="row">
@@ -52,6 +53,8 @@
     [Parameter] public IBSPFile BSP { get; set; } = null!;
 
 
+    private PromptDialogs? _dialogs;
+
     private float _lightScale = 1f;
     private float _lightMinimum = 0f;
     private IEnumerable<float> _lightRange = null!;
@@ -88,11 +91,11 @@
                 BSP.Lightmaps[i] = (byte)Math.Clamp(BSP.Lightmaps[i], min, max);
             }
 
-            await Swal.FireAsync("Success", $"The light range has been set between {(_lightRange.First() * 100f):0}% and {(_lightRange.Last() * 100f):0}%", SweetAlertIcon.Success);
+            await _dialogs!.SuccessAsync($"The light range has been set between {(_lightRange.First() * 100f):0}% and {(_lightRange.Last() * 100f):0}%");
         }
         catch (Exception ex)
         {
-            await Swal.FireAsync("Failed", $"There was an error while setting the light range: {ex}", SweetAlertIcon.Error);
+            await _dialogs!.FailureAsync($"There was an error while setting the light range: {ex}");
         }
         finally
         {
@@ -188,11 +191,11 @@
             for (var i = 0; i < BSP.Lightmaps.Length; i++)
                 BSP.Lightmaps[i] = (byte)Math.Max(BSP.Lightmaps[i], light);
 
-            await Swal.FireAsync("Success", $"The minimum light levels have been set to {_lightMinimum * 100:0}%", SweetAlertIcon.Success);
+            await _dialogs!.SuccessAsync($"The minimum light levels have been set to {_lightMinimum * 100:0}%");
         }
         catch (Exception ex)
         {
-            await Swal.FireAsync("Failed", $"There was an error while setting the minimum light levels: {ex}", SweetAlertIcon.Error);
+            await _dialogs!.FailureAsync($"There was an error while setting the minimum light levels: {ex}");
         }
         finally
         {
@@ -215,13 +218,13 @@
                 BSP.Lightmaps[i] = b;
             }
 
-            await Swal.FireAsync("Success", $"The lightmap has been scaled to {_lightScale * 100f:0}%", SweetAlertIcon.Success);
+            await _dialogs!.SuccessAsync($"The lightmap has been scaled to {_lightScale * 100f:0}%");
 
             _lightScale = 1f;
         }
         catch (Exception ex)
         {
-            await Swal.FireAsync("Failed", $"There was an error while scaling the lightmap: {ex}", SweetAlertIcon.Error);
+            await _dialogs!.FailureAsync($"There was an error while scaling the lightmap: {ex}");
         }
         finally
         {

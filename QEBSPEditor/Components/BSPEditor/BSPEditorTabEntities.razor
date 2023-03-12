@@ -1,5 +1,6 @@
 ﻿@using QEBSPEditor.Core.EntParsing;
 @using QEBSPEditor.Models.BSPFiles;
+@using CurrieTechnologies.Razor.SweetAlert2;
 @inject ApplicationSettingsService ApplicationSettingsService
 @inject IJSRuntime JSRuntime
 
@@ -20,6 +21,9 @@
                                         class="w-100 flex-1" Style="font-family: Consolas; white-space: pre; overflow-wrap: normal; overflow-x: scroll;" />
                     </div>
                 </RadzenTabsItem>
+                <RadzenTabsItem @ref="_tabItemUI" Text="UI">
+                    <BSPEditorTabEntitiesUI BSP="BSP" />
+                </RadzenTabsItem>
             </Tabs>
         </RadzenTabs>
 
@@ -30,6 +34,7 @@
 @code {
     [Parameter] public IBSPFile BSP { get; set; } = null!;
 
+    private RadzenTabsItem? _tabItemUI;
     private RadzenTextArea? _area = null!;
     private bool _preventKeyDownPropagation;
     private bool _moveCaret = false;

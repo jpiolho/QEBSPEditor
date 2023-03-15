@@ -2,6 +2,7 @@
 @using QEBSPEditor.Core.EntParsing;
 @using QEBSPEditor.Models.BSPFiles;
 @inject ILogger<BSPEditorTabEntitiesUI> Logger
+@inject DialogService DialogService
 
 <PromptDialogs @ref="_dialogs" />
 
@@ -38,7 +39,7 @@
         <RadzenDataGridColumn TItem="Entity" Title="Actions" Sortable="false" Filterable="false">
             <Template>
                 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Wrap="FlexWrap.Wrap">
-                    @*<RadzenButton Text="Edit" ButtonStyle="ButtonStyle.Secondary" />*@
+                    <RadzenButton Text="Edit" ButtonStyle="ButtonStyle.Secondary" Click="() => OpenEntityEditAsync(context)" />
                     <RadzenButton Text="Delete" ButtonStyle="ButtonStyle.Danger" Click="() => DeleteEntityAsync(context)" />
                 </RadzenStack>
             </Template>
@@ -59,6 +60,17 @@
         _entities = await Task.Run(() => QuickEntParser.ParseEntities(BSP.Entities));
     }
 
+    private async Task OpenEntityEditAsync(Entity entity)
+    {
+        await DialogService.OpenAsync<EntityEdit>("Edit entity", new()
+        {
+            { nameof(EntityEdit.Entity), entity },
+            { nameof(EntityEdit.BSP), BSP }
+        },new()
+    {
+        Width = "800px"
+    });
+    }
     private async Task DeleteEntityAsync(Entity entity)
     {
         var targetname = entity.Targetname;

@@ -1,0 +1,122 @@
+﻿@using QEBSPEditor.Models.BSPFiles;
+@using System.Text;
+@inject DialogService DialogService
+
+@if (Entity is null)
+    return;
+
+<PromptDialogs @ref="_promptDialogs" />
+
+<div class="container-fluid">
+    @foreach (var kv in _keyValues)
+    {
+        <div class="row mb-2">
+            <div class="col-md-4">
+                <RadzenLabel Text="@kv.Key" />
+            </div>
+            <div class="col-md">
+                <RadzenTextBox Value="@kv.Value" ValueChanged="(value) => { _keyValues[kv.Key] = value; }" class="w-100" />
+            </div>
+            <div class="col-md-auto">
+                <RadzenButton Text="Delete" ButtonStyle="ButtonStyle.Danger" Click="() => DeleteKeyValueAsync(kv.Key)" Style="width: 100px"  />
+            </div>
+        </div>
+    }
+
+    <div class="row mt-2">
+        <div class="col-md-4">
+            <RadzenTextBox @bind-Value="_newKey" Placeholder="New key" class="w-100" />
+        </div>
+        <div class="col-md">
+            <RadzenTextBox @bind-Value="_newValue" Placeholder="New value" class="w-100" />
+        </div>
+        <div class="col-md-auto">
+            <RadzenButton Text="Add" Click="AddKeyValueAsync" ButtonStyle="ButtonStyle.Success" Style="width:100px" />
+        </div>
+    </div>
+
+
+    <div class="row mt-4">
+        <div class="col">
+            <RadzenButton Text="Ok" Click="SaveAsync" class="me-1 float-end" ButtonStyle="ButtonStyle.Primary" Style="width: 80px;" />
+            <RadzenButton Text="Cancel" Click="() => DialogService.Close(true)" ButtonStyle="ButtonStyle.Light" class="ml-2 me-1 float-end" />
+        </div>
+    </div>
+</div>
+
+@code {
+        [Parameter, EditorRequired] public IBSPFile BSP { get; set; } = null!;
+        [Parameter, EditorRequired] public Entity Entity { get; set; } = null!;
+
+    private Dictionary<string, string> _keyValues { get; set; } = new();
+    private PromptDialogs? _promptDialogs;
+
+    private string? _newKey, _newValue;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        _keyValues = new Dictionary<string, string>(Entity!.KeyValues,StringComparer.OrdinalIgnoreCase);
+    }
+
+
+    private async Task AddKeyValueAsync()
+    {
+        var newKey = _newKey?.Trim();
+
+        if (string.IsNullOrWhiteSpace(newKey))
+            return;
+
+        var newValue = _newValue;
+        if (newValue == null)
+            return;
+
+        if (_keyValues.ContainsKey(newKey))
+        {
+            await _promptDialogs!.FailureAsync("Keyvalue already exists", $"The key '{newKey}' already exists");
+            return;
+        }
+
+        _keyValues.Add(newKey, newValue);
+
+        // Clear the values
+        _newKey = string.Empty;
+        _newValue = string.Empty;
+    }
+
+    private async Task DeleteKeyValueAsync(string key)
+    {
+        if (!await _promptDialogs!.ConfirmAsync("Delete keyvalue", $"Are you sure you want to delete the key '{key}'?"))
+            return;
+
+        _keyValues.Remove(key);
+    }
+
+    private async Task SaveAsync()
+    {
+        foreach (var kv in _keyValues)
+            Entity!.SetKeyValue(kv.Key, kv.Value);
+
+        if(Entity.SourceHint is not null)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine("{");
+            foreach(var kv in _keyValues)
+            {
+                var key = kv.Key.Replace("\"", "\\\"");
+                var value = kv.Value.Replace("\"", "\\\"");
+
+                sb.AppendLine($"  \"{key}\" \"{value}\"");
+            }
+            sb.AppendLine("}");
+
+            BSP.Entities = BSP.Entities.Substring(0, Entity.SourceHint.OffsetStart) + sb.ToString() + BSP.Entities.Substring(Entity.SourceHint.OffsetEnd);
+        }
+
+        await _promptDialogs!.SuccessAsync("Entity saved", "The entity was saved");
+
+        DialogService.Close(true);
+    }
+}

@@ -7,6 +7,8 @@ namespace QEBSPEditor.Models;
 public class Entity
 {
     private Dictionary<string, string> _keyValues { get; set; } = new(StringComparer.InvariantCultureIgnoreCase);
+
+    public Dictionary<string, string> KeyValues => _keyValues;
     public EntitySourceHint? SourceHint { get; set; } = null;
 
     public string? Classname { get => GetKeyValue("classname"); set => SetKeyValue("classname", value); }

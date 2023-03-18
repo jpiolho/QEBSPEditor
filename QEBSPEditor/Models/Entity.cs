@@ -36,9 +36,9 @@ public class Entity
 
         var split = value.Split(" ");
 
-        if (!float.TryParse(split[0],CultureInfo.InvariantCulture,out var x)) return defaultValue;
-        if (!float.TryParse(split[1],CultureInfo.InvariantCulture,out var y)) return defaultValue;
-        if (!float.TryParse(split[2],CultureInfo.InvariantCulture,out var z)) return defaultValue;
+        if (!float.TryParse(split[0], CultureInfo.InvariantCulture, out var x)) return defaultValue;
+        if (!float.TryParse(split[1], CultureInfo.InvariantCulture, out var y)) return defaultValue;
+        if (!float.TryParse(split[2], CultureInfo.InvariantCulture, out var z)) return defaultValue;
 
         return new Vector3(x, y, z);
     }

@@ -9,9 +9,9 @@
             // First try good ol bsp
             var intVersion = reader.ReadInt32();
             stream.Position = 0;
-            if(intVersion == 29)
+            if (intVersion == 29)
                 return new BSPFile29().Load(stream);
-            
+
             // Try other bsp versions
             var stringVersion = new string(reader.ReadChars(4));
             stream.Position = 0;

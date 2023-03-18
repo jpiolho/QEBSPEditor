@@ -5,7 +5,7 @@
         public event EventHandler? Changed;
 
         private bool _testingMode = false;
-        public bool TestingMode { get => _testingMode; set { _testingMode = value; Changed?.Invoke(this,EventArgs.Empty); } }
+        public bool TestingMode { get => _testingMode; set { _testingMode = value; Changed?.Invoke(this, EventArgs.Empty); } }
 
 
 

@@ -1,7 +1,4 @@
-﻿using Radzen.Blazor;
-using System.Net.Mime;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Text;
 
 namespace QEBSPEditor.Core.EntParsing;
 
@@ -61,9 +58,9 @@ public static class EntTools
         bool inEntity = false;
 
         parser.Start();
-        while(parser.Next(out var token, out var _))
+        while (parser.Next(out var token, out var _))
         {
-            switch(token.Type)
+            switch (token.Type)
             {
                 case TokenType.InlineComment:
                     if (inEntity)
@@ -80,7 +77,7 @@ public static class EntTools
                 case TokenType.CloseEntity: inEntity = false; sb.AppendLine("}"); break;
             }
         }
-      
+
         return sb.ToString();
     }
 
@@ -90,7 +87,7 @@ public static class EntTools
 
         var parser = new QuickEntParser(code);
         parser.Start();
-        while(parser.Next(out var token, out var _))
+        while (parser.Next(out var token, out var _))
         {
             switch (token.Type)
             {

@@ -1,5 +1,4 @@
 ﻿using QEBSPEditor.Models;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -50,7 +49,7 @@ public class QuickEntParser : IEntParser
         entity = null;
 
         string? keyBuffer = null;
-        while(Next(out var token, out error))
+        while (Next(out var token, out error))
         {
             if (error != null)
                 return false;
@@ -91,7 +90,7 @@ public class QuickEntParser : IEntParser
 
         var entities = new List<Entity>();
 
-        while(parser.NextEntity(out var entity, out _))
+        while (parser.NextEntity(out var entity, out _))
             entities.Add(entity);
 
         return entities;

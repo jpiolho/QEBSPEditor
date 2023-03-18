@@ -25,7 +25,7 @@ public class RegexBucket
     {
         if (!_bucket.TryGetValue(pattern, out var regex))
             _bucket.Add(pattern, regex = new Regex(pattern, RegexOptions.Compiled | RegexOptions.Multiline | options));
-        
-        return regex.Match(input,offset);
+
+        return regex.Match(input, offset);
     }
 }

@@ -137,7 +137,7 @@ namespace QEBSPEditor.Models.BSPFiles
         }
 
 
-        
+
 
         private static void ReadEntityChunk(ChunkHeader header, BSPFile29 file, BinaryReader reader)
         {
@@ -160,6 +160,6 @@ namespace QEBSPEditor.Models.BSPFiles
             file.Faces = faces;
         }
 
-        
+
     }
 }

@@ -1,6 +1,5 @@
 ﻿using sly.lexer;
 using sly.parser.generator;
-using sly.parser.parser;
 
 namespace QEBSPEditor.Core.EntParsing
 {
@@ -8,7 +7,7 @@ namespace QEBSPEditor.Core.EntParsing
     {
         public class Entity
         {
-            public List<KeyValuePair<string,string>> KeyValues { get; set; } = new();
+            public List<KeyValuePair<string, string>> KeyValues { get; set; } = new();
         }
 
         public enum EntitiesTokens
@@ -25,7 +24,7 @@ namespace QEBSPEditor.Core.EntParsing
             [Lexeme("//.*\n")]
             COMMENT,
 
-            
+
             [Lexeme("[ \\t]+", isSkippable: true)]
             WHITESPACE,
 
@@ -36,7 +35,7 @@ namespace QEBSPEditor.Core.EntParsing
         private class EntitiesParser
         {
             [Production("keyvalue: STRING STRING")]
-            public KeyValuePair<string,string> KeyValue(Token<EntitiesTokens> key, Token<EntitiesTokens> value)
+            public KeyValuePair<string, string> KeyValue(Token<EntitiesTokens> key, Token<EntitiesTokens> value)
             {
                 return new KeyValuePair<string, string>(key.Value.Trim('"').Trim(), value.Value.Trim('"'));
             }
@@ -46,7 +45,7 @@ namespace QEBSPEditor.Core.EntParsing
             {
                 return new Entity()
                 {
-                    KeyValues = keyvalues.Cast<KeyValuePair<string,string>>().ToList()
+                    KeyValues = keyvalues.Cast<KeyValuePair<string, string>>().ToList()
                 };
             }
 
@@ -76,7 +75,7 @@ namespace QEBSPEditor.Core.EntParsing
             var parserInstance = new EntitiesParser();
             var builder = new ParserBuilder<EntitiesTokens, object>();
             var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "entities").Result;
-            
+
             var tokens = parser.Lexer.Tokenize(content);
 
             if (tokens.IsError)

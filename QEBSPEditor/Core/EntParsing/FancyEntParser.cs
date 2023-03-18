@@ -1,6 +1,5 @@
 ﻿using QEBSPEditor.Core.Extensions;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace QEBSPEditor.Core.EntParsing

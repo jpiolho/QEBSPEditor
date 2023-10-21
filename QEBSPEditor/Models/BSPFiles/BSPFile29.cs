@@ -2,7 +2,7 @@
 
 namespace QEBSPEditor.Models.BSPFiles
 {
-    public class BSPFile29 : BSPFileBase, IBSPFile
+    public class BSPFile29 : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPFileLighting
     {
         public class Face : IBSPWriteable
         {
@@ -67,6 +67,8 @@ namespace QEBSPEditor.Models.BSPFiles
         public byte[] LEdges { get; set; }
         public byte[] Models { get; set; }
 
+
+        public BSPCapabilities Capabilities => BSPCapabilities.Entities | BSPCapabilities.Lighting;
 
         public void Save(Stream stream)
         {

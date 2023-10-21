@@ -8,14 +8,14 @@
 <CascadingValue Value="BSP">
     <RadzenTabs class="h-100" RenderMode="TabRenderMode.Server">
         <Tabs>
-            <RadzenTabsItem Text="Entities">
-                <BSPEditorTabEntities BSP="BSP" />
+            <RadzenTabsItem Text="Entities" Disabled="!BSP.Capabilities.HasFlag(BSPCapabilities.Entities)">
+                <BSPEditorTabEntities BSP="(BSP as IBSPFileEntities)" />
             </RadzenTabsItem>
 
             @if (ApplicationSettingsService.TestingMode)
             {
-                <RadzenTabsItem Text="Lighting">
-                    <BSPEditorTabLighting BSP="BSP" />
+                <RadzenTabsItem Text="Lighting" Disabled="!BSP.Capabilities.HasFlag(BSPCapabilities.Lighting)">
+                    <BSPEditorTabLighting BSP="BSP as IBSPFileLighting" />
                 </RadzenTabsItem>
             }
         </Tabs>

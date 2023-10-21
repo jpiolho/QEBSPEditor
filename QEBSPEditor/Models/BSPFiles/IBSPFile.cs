@@ -2,9 +2,7 @@
 
 public interface IBSPFile
 {
-    string Entities { get; set; }
-    byte[] Lightmaps { get; set; }
-
+    BSPCapabilities Capabilities { get; }
     IBSPFile Load(Stream stream);
     void Save(Stream stream);
 }

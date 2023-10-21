@@ -11,7 +11,7 @@ namespace QEBSPEditor.Tests
         public void ParseEntitiesFromSource_SingleEntity()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.Setup(b => b.Entities).Returns(
 @"{ 
     ""classname"" ""func_wall"" 
@@ -32,7 +32,7 @@ namespace QEBSPEditor.Tests
         public void ParseEntitiesFromSource_EmptySource()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.Setup(b => b.Entities).Returns("");
 
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
@@ -48,7 +48,7 @@ namespace QEBSPEditor.Tests
         public void ParseEntitiesFromSource_MultipleEntities()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.Setup(b => b.Entities).Returns(
         @"{ 
     ""classname"" ""func_wall"" 
@@ -76,7 +76,7 @@ namespace QEBSPEditor.Tests
         public void ParseEntitiesFromSource_InvalidEntity()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.Setup(b => b.Entities).Returns(
 @"{ 
     invalidkey ""func_wall"" 
@@ -95,7 +95,7 @@ namespace QEBSPEditor.Tests
         public void ParseEntitiesFromSource_WithAdditionalKeys()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.Setup(b => b.Entities).Returns(
 @"{ 
     ""classname"" ""func_wall""
@@ -119,7 +119,7 @@ namespace QEBSPEditor.Tests
         public void ParseEntitiesFromSource_Minified()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.Setup(b => b.Entities).Returns("{\"classname\"\"func_wall\"\"health\"\"100\"\"targetname\"\"mywall\"}");
 
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
@@ -138,7 +138,7 @@ namespace QEBSPEditor.Tests
         public void ParseEntitiesFromSource_EntityNotClosed()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.Setup(b => b.Entities).Returns(
 @"{ 
     ""classname"" ""func_wall"" 
@@ -166,7 +166,7 @@ namespace QEBSPEditor.Tests
         {
             // Arrange
             var source = "{ \"classname\" \"func_rotate\" }";
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities);
 
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
@@ -184,7 +184,7 @@ namespace QEBSPEditor.Tests
         {
             // Arrange
             var source = "{ \"classname\" \"item_ammo\" }";
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities);
 
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
@@ -205,7 +205,7 @@ namespace QEBSPEditor.Tests
         public void AddEntity_NewEntityAdded()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities, "");
 
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
@@ -224,7 +224,7 @@ namespace QEBSPEditor.Tests
         public void AddEntity_NewEntityAddedAndCanParseAgain()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities, "");
 
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
@@ -244,7 +244,7 @@ namespace QEBSPEditor.Tests
         public void AddEntity_NewEntityAddedWithOtherEntitiesAlreadyPresent()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities,
 @"{
     ""classname"" ""item_health""
@@ -266,7 +266,7 @@ namespace QEBSPEditor.Tests
         public void AddEntity_NewEntityAddedWithOtherEntitiesAlreadyPresentAndCanParseAgain()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities,
 @"{
     ""classname"" ""item_ammo""
@@ -292,7 +292,7 @@ namespace QEBSPEditor.Tests
         public void AddEntity_ClassNameSetCorrectly()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities, "");
 
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
@@ -309,7 +309,7 @@ namespace QEBSPEditor.Tests
         public void AddEntity_SourceHintUpdated()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities, "");
 
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
@@ -331,7 +331,7 @@ namespace QEBSPEditor.Tests
         public void RemoveEntity_EntityIsRemoved()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities, "");
 
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
@@ -349,7 +349,7 @@ namespace QEBSPEditor.Tests
         public void RemoveEntity_SourceIsUpdated()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities,
 @"{
     ""classname"" ""func_wall""
@@ -369,7 +369,7 @@ namespace QEBSPEditor.Tests
         public void RemoveEntity_SourceWithNewLinesKeepsFormatting()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities,
 @"{
     ""classname"" ""func_wall""
@@ -401,7 +401,7 @@ namespace QEBSPEditor.Tests
         public void RemoveEntity_SourceMinifiedKeepsFormatting()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities,@"{""classname""""func_wall""}{""classname""""weapon_rocketlauncher""""ammo""""1234""}{""classname""""item_shells""}");
 
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
@@ -418,7 +418,7 @@ namespace QEBSPEditor.Tests
         public void RemoveEntity_SourceWithoutNewLinesKeepsFormatting()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities, @"{ ""classname"" ""func_wall"" } {""classname"" ""weapon_rocketlauncher"" ""ammo"" ""1234"" } { ""classname"" ""item_shells"" }");
 
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
@@ -435,7 +435,7 @@ namespace QEBSPEditor.Tests
         public void RemoveEntity_SourceIsUpdatedCorrectlyWhenMultipleEntitiesRemoved()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities,
 @"{
     ""classname"" ""worldspawn""
@@ -467,7 +467,7 @@ namespace QEBSPEditor.Tests
         public void RemoveEntity_RemoveMultipleEntitiesAndParseAgain()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities,
 @"{
     ""classname"" ""worldspawn""
@@ -509,7 +509,7 @@ namespace QEBSPEditor.Tests
         public void RemoveEntity_SourceHintAdjustedCorrectly()
         {
             // Arrange
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities, "");
 
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
@@ -540,7 +540,7 @@ namespace QEBSPEditor.Tests
 
             string source = @"{""classname"" ""func_wall""}";
 
-            var mockBSP = new Mock<IBSPFile>();
+            var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities, source);
             
             var editor = new BSPEntitySourceEditor(mockBSP.Object);

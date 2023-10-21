@@ -6,15 +6,15 @@ namespace QEBSPEditor.Models;
 
 public class BSPEntitySourceEditor
 {
-    private IBSPFile _bsp;
+    private IBSPFileEntities _bsp;
     private List<Entity> _entities;
 
 
-    public IBSPFile BSP => _bsp;
+    public IBSPFileEntities BSP => _bsp;
     public string Source { get => _bsp.Entities; }
     public IReadOnlyList<Entity> Entities => _entities;
 
-    public BSPEntitySourceEditor(IBSPFile bsp)
+    public BSPEntitySourceEditor(IBSPFileEntities bsp)
     {
         _bsp = bsp;
         _entities = new List<Entity>();

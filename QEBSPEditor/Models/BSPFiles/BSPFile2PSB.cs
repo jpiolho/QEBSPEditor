@@ -2,7 +2,7 @@
 
 namespace QEBSPEditor.Models.BSPFiles;
 
-public class BSPFile2PSB : BSPFileBase, IBSPFile
+public class BSPFile2PSB : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPFileLighting
 {
     /* 
      * RMQ support (2PSB). 32bits instead of shorts for all but bbox sizes (which
@@ -73,7 +73,7 @@ public class BSPFile2PSB : BSPFileBase, IBSPFile
     public byte[] LEdges { get; set; }
     public byte[] Models { get; set; }
 
-
+    public BSPCapabilities Capabilities => BSPCapabilities.Entities | BSPCapabilities.Lighting;
     public void Save(Stream stream)
     {
         using var writer = new BinaryWriter(stream);

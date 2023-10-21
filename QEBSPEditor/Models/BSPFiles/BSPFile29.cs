@@ -2,7 +2,7 @@
 
 namespace QEBSPEditor.Models.BSPFiles;
 
-public class BSPFile29 : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPFileLighting, IBSPSave
+public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPSave
 {
     public class Face : IBSPWriteable
     {
@@ -51,25 +51,25 @@ public class BSPFile29 : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPFileLighti
         }
     }
 
-    public string Entities { get; set; }
-    public byte[] Planes { get; set; }
-    public byte[] MipTex { get; set; }
-    public byte[] Vertices { get; set; }
-    public byte[] Visilist { get; set; }
-    public byte[] Nodes { get; set; }
-    public byte[] TexInfo { get; set; }
-    public List<Face> Faces { get; set; }
-    public byte[] Lightmaps { get; set; }
-    public byte[] ClipNodes { get; set; }
-    public byte[] Leaves { get; set; }
-    public byte[] LFace { get; set; }
-    public byte[] Edges { get; set; }
-    public byte[] LEdges { get; set; }
-    public byte[] Models { get; set; }
+    public string Entities { get; set; } = "";
+    public byte[] Planes { get; set; } = Array.Empty<byte>();
+    public byte[] MipTex { get; set; } = Array.Empty<byte>();
+    public byte[] Vertices { get; set; } = Array.Empty<byte>();
+    public byte[] Visilist { get; set; } = Array.Empty<byte>();
+    public byte[] Nodes { get; set; } = Array.Empty<byte>();
+    public byte[] TexInfo { get; set; } = Array.Empty<byte>();
+    public List<Face> Faces { get; set; } = new();
+    public byte[] Lightmaps { get; set; } = Array.Empty<byte>();
+    public byte[] ClipNodes { get; set; } = Array.Empty<byte>();
+    public byte[] Leaves { get; set; } = Array.Empty<byte>();
+    public byte[] LFace { get; set; } = Array.Empty<byte>();
+    public byte[] Edges { get; set; } = Array.Empty<byte>();
+    public byte[] LEdges { get; set; } = Array.Empty<byte>();
+    public byte[] Models { get; set; } = Array.Empty<byte>();
 
 
-    public BSPCapabilities Capabilities => BSPCapabilities.Entities | BSPCapabilities.Lighting | BSPCapabilities.Saveable;
-    public string VersionName => "29";
+    public override BSPCapabilities Capabilities => BSPCapabilities.Entities | BSPCapabilities.Lighting | BSPCapabilities.Saveable;
+    public override string VersionName => "29";
 
     public void Save(Stream stream)
     {
@@ -96,7 +96,7 @@ public class BSPFile29 : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPFileLighti
         WriteChunkAndHeader(writer, 14, Models);
     }
 
-    public IBSPFile Load(Stream stream)
+    public override IBSPFile Load(Stream stream)
     {
         using var reader = new BinaryReader(stream);
 
@@ -120,14 +120,14 @@ public class BSPFile29 : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPFileLighti
         var headerLEdges = ReadChunkHeader(reader);
         var headerModels = ReadChunkHeader(reader);
 
-        ReadEntityChunk(headerEntities, this, reader);
+        this.Entities = ReadEntityChunk(headerEntities, reader);
         this.Planes = ReadGenericChunk(headerPlanes, reader);
         this.MipTex = ReadGenericChunk(headerMiptex, reader);
         this.Vertices = ReadGenericChunk(headerVertices, reader);
         this.Visilist = ReadGenericChunk(headerVisilist, reader);
         this.Nodes = ReadGenericChunk(headerNodes, reader);
         this.TexInfo = ReadGenericChunk(headerTexInfo, reader);
-        ReadFaceChunk(headerFaces, this, reader);
+        this.Faces = ReadFaceChunk(headerFaces, reader);
         this.Lightmaps = ReadGenericChunk(headerLightmaps, reader);
         this.ClipNodes = ReadGenericChunk(headerClipnodes, reader);
         this.Leaves = ReadGenericChunk(headerLeaves, reader);
@@ -141,15 +141,16 @@ public class BSPFile29 : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPFileLighti
 
 
 
+    #region Load Methods
 
-    private static void ReadEntityChunk(ChunkHeader header, BSPFile29 file, BinaryReader reader)
+    private static string ReadEntityChunk(ChunkHeader header, BinaryReader reader)
     {
         reader.BaseStream.Seek(header.Offset, SeekOrigin.Begin);
 
-        file.Entities = Encoding.UTF8.GetString(reader.ReadBytes(header.Size - 1));
+        return Encoding.UTF8.GetString(reader.ReadBytes(header.Size - 1));
     }
 
-    private static void ReadFaceChunk(ChunkHeader header, BSPFile29 file, BinaryReader reader)
+    private static List<Face> ReadFaceChunk(ChunkHeader header, BinaryReader reader)
     {
         reader.BaseStream.Seek(header.Offset, SeekOrigin.Begin);
 
@@ -160,8 +161,10 @@ public class BSPFile29 : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPFileLighti
         for (var i = 0; i < total; i++)
             faces.Add(Face.Read(reader));
 
-        file.Faces = faces;
+        return faces;
     }
+
+    #endregion
 
 
 }

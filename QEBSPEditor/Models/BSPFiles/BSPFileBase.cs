@@ -1,8 +1,12 @@
 ﻿namespace QEBSPEditor.Models.BSPFiles;
 
-public abstract class BSPFileBase
+public abstract class BSPFileBase : IBSPFile
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
+
+    public abstract string VersionName { get; }
+    public abstract BSPCapabilities Capabilities { get; }
+    public abstract IBSPFile Load(Stream stream);
 
     protected interface IBSPWriteable
     {

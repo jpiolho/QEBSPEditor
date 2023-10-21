@@ -49,6 +49,7 @@ namespace QEBSPEditor.Core.EntParsing
 
         public FancyEntParser(string code)
         {
+            _tokens = null!;
             this._code = code;
             _regex = RegexBucket.Default;
 

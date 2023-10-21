@@ -23,14 +23,14 @@
 @code {
     [Parameter] public EventCallback Click { get; set; }
 
-    private IReadOnlyDictionary<string, object> _attributes;
+    private IReadOnlyDictionary<string, object>? _attributes;
 
     protected override void OnParametersSet()
     {
         var attributes = Attributes ?? Enumerable.Empty<KeyValuePair<string, object>>();
 
         _attributes = new Dictionary<string, object>(
-            attributes.Append(KeyValuePair.Create<string,object>("onmouseup", ClickedAsync))
+            attributes.Append(KeyValuePair.Create<string,object>("onmouseup", (object)ClickedAsync))
         );
     }
 

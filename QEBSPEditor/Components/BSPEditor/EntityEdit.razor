@@ -92,11 +92,13 @@
         _keyValues.Remove(key);
     }
 
-    private async Task SaveAsync()
+    private Task SaveAsync()
     {
         foreach (var kv in _keyValues)
             Entity!.SetKeyValue(kv.Key, kv.Value);
 
         DialogService.Close(true);
+
+        return Task.CompletedTask;
     }
 }

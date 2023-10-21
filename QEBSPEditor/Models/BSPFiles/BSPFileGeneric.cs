@@ -3,21 +3,20 @@ using System.Text;
 
 namespace QEBSPEditor.Models.BSPFiles;
 
-public class BSPFileGeneric : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPSave
+public class BSPFileGeneric : BSPFileBase, IBSPFileEntities, IBSPSave
 {
-    public int Debug { get; set; }
-    public BSPCapabilities Capabilities => BSPCapabilities.Entities | BSPCapabilities.Saveable;
+    public override BSPCapabilities Capabilities => BSPCapabilities.Entities | BSPCapabilities.Saveable;
 
 
-    private byte[] _originalBytes;
+    private byte[] _originalBytes = Array.Empty<byte>();
     private string _entities = "";
     private ChunkHeader _entitiesHeader;
     private int _entitiesHeaderOffset;
 
     public string Entities { get => _entities; set => _entities = value; }
-    public string VersionName => "Generic";
+    public override string VersionName => "Generic";
 
-    public IBSPFile Load(Stream stream)
+    public override IBSPFile Load(Stream stream)
     {
         // First, try to find the entities chunk
         using (var memoryStream = new MemoryStream())

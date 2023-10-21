@@ -23,6 +23,7 @@ public class QuickEntParser : IEntParser
     public QuickEntParser(string code)
     {
         _code = code;
+        _parser = null!;
     }
 
     public void Start()

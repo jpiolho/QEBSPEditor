@@ -3,5 +3,5 @@
 public class ParseError
 {
     public ParsePosition Position { get; set; }
-    public string Error { get; set; }
+    public string? Error { get; set; }
 }

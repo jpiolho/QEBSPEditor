@@ -52,7 +52,7 @@ public class BSPFileGeneric : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPSave
             throw new InvalidDataException("Could not find entities chunk beginning");
 
         // Now find in the header, where the offset is
-        using(var ms = new MemoryStream(_originalBytes))
+        using (var ms = new MemoryStream(_originalBytes))
         using (var reader = new BinaryReader(stream))
         {
             // Apply different offsets to try to match extra bytes if there's any
@@ -90,11 +90,11 @@ public class BSPFileGeneric : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPSave
     {
         using var writer = new BinaryWriter(stream);
 
-        
+
         // First write all the original bytes
         writer.Write(_originalBytes);
 
-        
+
         // Lets append our own entities at the end
         var offset = stream.Position;
         var entitiesAsBytes = Encoding.ASCII.GetBytes(_entities);
@@ -109,9 +109,9 @@ public class BSPFileGeneric : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPSave
         // Now lets change the header to our own
         stream.Seek(_entitiesHeaderOffset, SeekOrigin.Begin);
         writer.Write((int)offset);
-        writer.Write(entitiesAsBytes.Length+1);
+        writer.Write(entitiesAsBytes.Length + 1);
 
         writer.Flush();
-        
+
     }
 }

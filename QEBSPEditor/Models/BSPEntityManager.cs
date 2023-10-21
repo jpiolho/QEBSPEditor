@@ -66,7 +66,7 @@ public class BSPEntitySourceEditor
             var length = sh.Length + trim;
             foreach (var ent in _entities)
             {
-                if(ent != entity && ent.SourceHint is not null && ent.SourceHint.OffsetStart > sh.OffsetEnd)
+                if (ent != entity && ent.SourceHint is not null && ent.SourceHint.OffsetStart > sh.OffsetEnd)
                 {
                     ent.SourceHint.OffsetStart -= length;
                     ent.SourceHint.OffsetEnd -= length;
@@ -78,7 +78,7 @@ public class BSPEntitySourceEditor
     private int GetEndOfLineTrim(int index)
     {
         int count = 0;
-        while(index < _bsp.Entities.Length)
+        while (index < _bsp.Entities.Length)
         {
             if (char.IsWhiteSpace(_bsp.Entities[index++]))
                 count++;

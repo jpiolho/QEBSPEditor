@@ -30,4 +30,17 @@
 
         return result.IsConfirmed;
     }
+
+    public async Task WarningAsync(string body) => await WarningAsync("Warning", body);
+    public async Task WarningAsync(string title, string body)
+    {
+        var result = await Swal.FireAsync(new SweetAlertOptions()
+            {
+                TitleText = title,
+                Text = body,
+                Icon = SweetAlertIcon.Warning,
+                ShowConfirmButton = true,
+                ConfirmButtonText = "Ok",
+            });
+    }
 }

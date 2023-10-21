@@ -20,7 +20,16 @@
             else if (stringVersion == "2PSB")
                 return new BSPFile2PSB().Load(stream);
 
-            throw new InvalidDataException($"Unsupported BSP version: {stringVersion} | {intVersion}");
+            // Try generic
+            try
+            {
+                return new BSPFileGeneric().Load(stream);   
+            }
+            catch(InvalidDataException ex)
+            {
+                throw new InvalidDataException($"Unsupported BSP version: {stringVersion} | {intVersion}", ex);
+            }
+            
         }
     }
 }

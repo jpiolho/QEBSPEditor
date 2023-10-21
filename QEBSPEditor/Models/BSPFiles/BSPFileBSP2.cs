@@ -2,7 +2,7 @@
 
 namespace QEBSPEditor.Models.BSPFiles;
 
-public class BSPFileBSP2 : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPFileLighting
+public class BSPFileBSP2 : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPFileLighting, IBSPSave
 {
     /* BSP2 support. 32bits instead of shorts for everything (bboxes use floats) */
     private const string VersionHeader = "BSP2";
@@ -70,7 +70,8 @@ public class BSPFileBSP2 : BSPFileBase, IBSPFile, IBSPFileEntities, IBSPFileLigh
     public byte[] LEdges { get; set; }
     public byte[] Models { get; set; }
 
-    public BSPCapabilities Capabilities => BSPCapabilities.Entities | BSPCapabilities.Lighting;
+    public BSPCapabilities Capabilities => BSPCapabilities.Entities | BSPCapabilities.Lighting | BSPCapabilities.Saveable;
+    public string VersionName => "BSP2";
 
     public void Save(Stream stream)
     {

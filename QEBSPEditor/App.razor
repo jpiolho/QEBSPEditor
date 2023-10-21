@@ -11,6 +11,8 @@
 
 <RadzenDialog />
 
+<PromptDialogs @ref="_dialogs" />
+
 <RadzenLayout>
     <RadzenBody>
         @if (_bsp is not null)
@@ -19,10 +21,20 @@
         }
     </RadzenBody>
     <RadzenSidebar>
-        <div class="text-center">QEBSPEditor</div>
+        <SidebarText Title="QEBSPEditor" />
+
+        @if(_bsp is not null) {
+            <SidebarText Title="Name" Text="@_bsp.Name" />
+
+            <div class="d-flex">
+                <SidebarText Title="Type" Text="@_bsp.VersionName" />
+                <RadzenIcon class="pl-2" Icon="info" @onclick="() => CapabilitiesDialog.OpenAsync(DialogService, _bsp)" />
+            </div>
+        }
+
         <RadzenPanelMenu>
             <RadzenPanelMenuItemClickable Text="Load..." Icon="file_upload" Click="OpenLoadDialogAsync" />
-            <RadzenPanelMenuItemClickable Text="Save" Icon="file_download" Visible="@(_bsp is not null)" Click="SaveAsync" />
+            <RadzenPanelMenuItemClickable Text="Save" Icon="file_download" Visible="@(_bsp is not null && _bsp.Capabilities.HasFlag(BSPCapabilities.Saveable))" Click="SaveAsync" />
             <RadzenPanelMenuItemClickable Text="About" Icon="contact_support" Click="() => AboutDialog.OpenAsync(DialogService)" />
         </RadzenPanelMenu>
     </RadzenSidebar>
@@ -32,6 +44,7 @@
 
 @code {
     private IBSPFile? _bsp;
+    private PromptDialogs? _dialogs;
 
     protected override void OnInitialized()
     {
@@ -43,16 +56,28 @@
         var bsp = await BSPLoadDialog.OpenAsync(DialogService);
 
         if (bsp is not null) {
-            //bsp.Entities = EntFormatter.Prettify(bsp.Entities);
             _bsp = bsp;
+
+            if(bsp is BSPFileGeneric)
+            {
+                StateHasChanged();
+                await _dialogs!.WarningAsync("Generic BSP loaded", "This BSP version is not supported by QEBSPEditor, however it was possible to load it as a \"Generic BSP\".\nThis is a best-effort feature and there's no guarantee of things actually working. Thread carefully.");
+            }
+
         }
     }
 
+
     private async Task SaveAsync()
     {
+        if (_bsp is null)
+            throw new InvalidOperationException("No BSP loaded");
+
+        var bsp = (IBSPSave)_bsp;
         using (var ms = new MemoryStream())
         {
-            _bsp!.Save(ms);
+            bsp.Save(ms);
+            ms.Flush();
             await BlazorDownloadFileService.DownloadFileAsync("map.bsp", ms.ToArray());
         }
     }

@@ -1,0 +1,20 @@
+﻿@if (Text is null)
+{
+    <RadzenText TextAlign="TextAlign.Center" TextStyle="TextStyle.Body1"><b>@Title</b></RadzenText>
+}
+else
+{
+    <RadzenText class="pl-2" TextStyle="TextStyle.Body1">
+        @if (Title is not null)
+        {
+            <b>@Title: </b>
+        }
+
+        @Text
+    </RadzenText>
+}
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Text { get; set; }
+}

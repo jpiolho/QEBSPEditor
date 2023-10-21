@@ -2,6 +2,8 @@
 {
     public abstract class BSPFileBase
     {
+        public string Name { get; set; }
+
         protected interface IBSPWriteable
         {
             void Write(BinaryWriter writer);

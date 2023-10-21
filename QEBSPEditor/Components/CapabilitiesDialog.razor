@@ -1,0 +1,28 @@
+﻿@using QEBSPEditor.Models.BSPFiles;
+<div>
+    <div>QEBSPEditor offers the following capabilities for this BSP type:</div>
+
+    <div>
+        <ul>
+            @foreach (var flag in Enum.GetValues<BSPCapabilities>())
+            {
+                @if (flag == BSPCapabilities.None)
+                    continue;
+
+                if (BSP.Capabilities.HasFlag(flag))
+                {
+                    <li>@flag.ToString()</li>
+                }
+            }
+        </ul>
+    </div>
+</div>
+
+@code {
+    [Parameter] public IBSPFile BSP { get; set; } = null!;
+
+    public static async Task OpenAsync(DialogService dialogService, IBSPFile bsp)
+    {
+        await dialogService.OpenAsync<CapabilitiesDialog>("BSP Type information", new() { { nameof(BSP), bsp } }, new() { CloseDialogOnEsc = true, ShowClose = true });
+    }
+}

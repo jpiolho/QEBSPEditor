@@ -7,16 +7,7 @@
 
 <div>
 
-    <div class="@(_loading ? "visually-hidden" : "")">
-        <input @ref="_fileInputReference" type="file" @onchange="@(_ => LoadAsync())" />
-    </div>
-
-    @if (_loading)
-    {
-        <div class="d-flex justify-content-center">
-            <Spinner />
-        </div>
-    }
+    <FileInput FileLoad="Load" />
 
     @if (!string.IsNullOrEmpty(_error))
     {
@@ -33,47 +24,26 @@
     private ElementReference _fileInputReference;
 
 
-    private async Task LoadAsync()
+    private void Load(FileInput.FileLoadEventArgs args)
     {
-        _loading = true;
-        StateHasChanged();
+        IBSPFile bsp;
         try
         {
-            var file = (await FileReaderService.CreateReference(_fileInputReference).EnumerateFilesAsync()).FirstOrDefault();
-
-            if (file is null)
-                return;
-
-            var info = await file.ReadFileInfoAsync();
-            
-            IBSPFile bsp;
-            using (var memoryStream = await file.CreateMemoryStreamAsync(4096))
-            {
-                try
-                {
-                    bsp = BSPFiles.Load(memoryStream);
-                }
-                catch (InvalidDataException ex)
-                {
-                    _error = $"Failed to load: {ex.Message}";
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    _error = $"Failed to load: {ex}";
-                    return;
-                }
-
-            }
-
-            bsp.Name = info.Name;
-            DialogService.Close(bsp);
+            bsp = BSPFiles.Load(args.Stream);
         }
-        finally
+        catch (InvalidDataException ex)
         {
-            _loading = false;
-            StateHasChanged();
+            _error = $"Failed to load: {ex.Message}";
+            return;
         }
+        catch (Exception ex)
+        {
+            _error = $"Failed to load: {ex}";
+            return;
+        }
+
+        bsp.Name = args.Info.Name;
+        DialogService.Close(bsp);
     }
 
     public static async Task<IBSPFile> OpenAsync(DialogService dialogService)

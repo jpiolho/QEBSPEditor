@@ -1,0 +1,39 @@
+﻿@using QEBSPEditor.Components.Settings
+@inject ApplicationSettingsService ApplicationSettings
+@inject DialogService DialogService
+
+<div>
+    <SettingsSection Title="General">
+        <SettingsBool Label="Experimetal mode" @bind-Value="_settings.ExperimentalMode" />
+    </SettingsSection>
+
+    <SettingsSection>
+        <RadzenButton ButtonStyle="ButtonStyle.Primary" Text="Save" Click="OnSaveClickedAsync" />
+    </SettingsSection>
+</div>
+
+@code {
+
+    private ApplicationSettings _settings = null!;
+
+    protected override void OnInitialized()
+    {
+        var settings = ApplicationSettings.Settings;
+
+        _settings = new()
+            {
+                ExperimentalMode = settings.ExperimentalMode,
+            };
+    }
+
+    private async Task OnSaveClickedAsync()
+    {
+        await ApplicationSettings.SaveAsync(_settings);
+        DialogService.Close();
+    }
+
+    public static async Task OpenAsync(DialogService dialogService)
+    {
+        await dialogService.OpenAsync<SettingsDialog>("Settings", new() { }, new() { CloseDialogOnEsc = false, ShowClose = true });
+    }
+}

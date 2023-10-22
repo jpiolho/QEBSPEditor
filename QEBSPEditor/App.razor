@@ -35,6 +35,7 @@
         <RadzenPanelMenu>
             <RadzenPanelMenuItemClickable Text="Load..." Icon="file_upload" Click="OpenLoadDialogAsync" />
             <RadzenPanelMenuItemClickable Text="Save" Icon="file_download" Visible="@(_bsp is not null && _bsp.Capabilities.HasFlag(BSPCapabilities.Saveable))" Click="SaveAsync" />
+            <RadzenPanelMenuItemClickable Text="Settings" Icon="settings" Click="() => SettingsDialog.OpenAsync(DialogService)" />
             <RadzenPanelMenuItemClickable Text="About" Icon="contact_support" Click="() => AboutDialog.OpenAsync(DialogService)" />
         </RadzenPanelMenu>
     </RadzenSidebar>
@@ -46,9 +47,10 @@
     private IBSPFile? _bsp;
     private PromptDialogs? _dialogs;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         ApplicationSettingsService.Changed += (_,_) => StateHasChanged();
+        await ApplicationSettingsService.LoadAsync();
     }
 
     private async Task OpenLoadDialogAsync()

@@ -12,7 +12,7 @@
                 <BSPEditorTabEntities BSP="(BSP as IBSPFileEntities)" />
             </RadzenTabsItem>
 
-            @if (ApplicationSettingsService.TestingMode)
+            @if (ApplicationSettingsService.Settings.ExperimentalMode)
             {
                 <RadzenTabsItem Text="Lighting" Disabled="!BSP.Capabilities.HasFlag(BSPCapabilities.Lighting)">
                     <BSPEditorTabLighting BSP="BSP as IBSPFileLighting" />

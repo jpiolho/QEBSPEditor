@@ -1,0 +1,15 @@
+﻿<RadzenCheckBox Name="@_name" Value="@Value" ValueChanged="ValueChanged" TValue="bool" />
+<RadzenLabel Text="@Label" Component="@_name" Style="margin-left: 8px; vertical-align: middle;" />
+
+@code {
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public bool Value { get; set; }
+    [Parameter] public EventCallback<bool> ValueChanged { get; set; }
+
+    private string? _name;
+
+    protected override void OnInitialized()
+    {
+        _name = Guid.NewGuid().ToString();
+    }
+}

@@ -1,0 +1,11 @@
+﻿<section class="mb-2">
+    <RadzenText TextStyle="TextStyle.H4" Text="@Title" />
+    <div>
+        @ChildContent
+    </div>
+</section>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

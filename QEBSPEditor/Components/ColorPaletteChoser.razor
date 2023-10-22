@@ -1,0 +1,28 @@
+﻿@using QEBSPEditor.Core;
+@inject ApplicationSettingsService ApplicationSettings
+
+<RadzenDropDown Data="_data" Value="ColorPalette" ValueChanged="ColorPaletteChanged" TextProperty="@nameof(ColorPalette.Name)">
+</RadzenDropDown>
+
+@code {
+    [Parameter] public ColorPalette? ColorPalette { get; set; }
+    [Parameter] public EventCallback<ColorPalette?> ColorPaletteChanged { get; set; }
+
+    private IEnumerable<ColorPalette> _data = null!;
+
+    protected override void OnInitialized()
+    {
+        _data = ApplicationSettings.Settings.ColorPalettes;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        _data = ApplicationSettings.Settings.ColorPalettes;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ColorPalette is null && _data is not null && _data.Any())
+            await ColorPaletteChanged.InvokeAsync(_data.First());
+    }
+}

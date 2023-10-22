@@ -2,9 +2,28 @@
 @inject ApplicationSettingsService ApplicationSettings
 @inject DialogService DialogService
 
+<PromptDialogs @ref="_dialogs" />
+
 <div>
     <SettingsSection Title="General">
         <SettingsBool Label="Experimetal mode" @bind-Value="_settings.ExperimentalMode" />
+    </SettingsSection>
+    <SettingsSection Title="Entities">
+        <SettingsBool Label="Prefer source to UI" @bind-Value="_settings.EntitiesPreferSource" />
+    </SettingsSection>
+    <SettingsSection Title="Palettes">
+        @foreach(var palette in _settings.ColorPalettes) {
+            <div class="row mb-2">
+                <div class="col-md">
+                    <RadzenTextBox @bind-Value="palette.Name" class="w-100" />
+                </div>
+                <div class="col-md-auto">
+                    <RadzenButton Text="Delete" ButtonStyle="ButtonStyle.Danger" Click="() => _settings.ColorPalettes.Remove(palette)" Style="width: 100px" />
+                </div>
+            </div>
+        }
+
+        <FileInput FileLoad="PaletteUploadedAsync" />
     </SettingsSection>
 
     <SettingsSection>
@@ -13,7 +32,7 @@
 </div>
 
 @code {
-
+    private PromptDialogs _dialogs = null!;
     private ApplicationSettings _settings = null!;
 
     protected override void OnInitialized()
@@ -23,7 +42,35 @@
         _settings = new()
             {
                 ExperimentalMode = settings.ExperimentalMode,
+                ColorPalettes = new(settings.ColorPalettes),
             };
+    }
+
+    private async Task PaletteUploadedAsync(FileInput.FileLoadEventArgs args)
+    {
+        if (args.Info.Size != 256 * 3)
+        {
+            await _dialogs.FailureAsync("Uploaded file is not a valid palette file");
+            return;
+        }
+
+        using var reader = new BinaryReader(args.Stream);
+
+        var palette = new int[256];
+        for (var i = 0; i < 256; i++)
+        {
+            byte r = reader.ReadByte();
+            byte g = reader.ReadByte();
+            byte b = reader.ReadByte();
+            palette[i] = (r << 16) | (g << 8) | b;
+        }
+        _settings.ColorPalettes.Add(new ColorPalette()
+            {
+                Name = $"Palette {_settings.ColorPalettes.Count+1}",
+                Palette = palette
+            });
+
+        StateHasChanged();
     }
 
     private async Task OnSaveClickedAsync()

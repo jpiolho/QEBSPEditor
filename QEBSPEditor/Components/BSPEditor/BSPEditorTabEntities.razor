@@ -6,9 +6,9 @@
 
 <div class="d-flex flex-column h-100">
     <RadzenCard class="mt-2 flex-grow-1">
-        <RadzenTabs class="h-100" RenderMode="TabRenderMode.Server">
+        <RadzenTabs @ref="_tabs" class="h-100" RenderMode="TabRenderMode.Server" @bind-SelectedIndex="_selectedTab">
             <Tabs>
-                <RadzenTabsItem Text="Source">
+                <RadzenTabsItem @ref="_tabItemSource" Text="Source">
                     <RadzenMenu>
                         <RadzenMenuItem Text="Add Entity" Icon="add_circle" Click="AddEntity" />
                         <RadzenMenuItem Text="Prettify" Icon="format_indent_increase" Click="() => BSP.Entities = EntTools.Prettify(BSP.Entities)" />
@@ -35,12 +35,21 @@
     [Parameter] public IBSPFileEntities BSP { get; set; } = null!;
 
     private RadzenTabsItem? _tabItemUI;
+    private RadzenTabsItem? _tabItemSource;
+    private RadzenTabs? _tabs;
     private RadzenTextArea? _area = null!;
     private bool _moveCaret = false;
-
+    private int _selectedTab;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if(firstRender)
+        {
+            // Automatically the right tab
+            _selectedTab = ApplicationSettingsService.Settings.EntitiesPreferSource ? _tabItemSource!.Index : _tabItemUI!.Index;
+            StateHasChanged();
+        }
+
         if (_moveCaret)
         {
             await JSRuntime.InvokeVoidAsync("setTextareaSelection", _area!.Element, BSP.Entities.Length - 3);

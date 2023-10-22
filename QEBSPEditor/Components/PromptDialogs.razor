@@ -8,7 +8,7 @@
         await Swal.FireAsync(title, body, SweetAlertIcon.Success);
     }
 
-    public async Task FailureAsync(string body) => await SuccessAsync("Failure", body);
+    public async Task FailureAsync(string body) => await FailureAsync("Failure", body);
     public async Task FailureAsync(string title, string body)
     {
         await Swal.FireAsync(title, body, SweetAlertIcon.Error);

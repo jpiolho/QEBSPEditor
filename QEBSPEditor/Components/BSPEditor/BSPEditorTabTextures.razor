@@ -1,0 +1,48 @@
+﻿@using QEBSPEditor.Models.BSPFiles;
+@using SixLabors.ImageSharp.Formats.Png;
+
+<div>Palette: <ColorPaletteChoser @bind-ColorPalette="_palette" /></div>
+
+@if(_palette is null)
+{
+    <RadzenText TextStyle="TextStyle.H5" class="mt-2">
+        You need to upload a palette in the settings before you're able to view textures
+    </RadzenText>
+    return;
+}
+
+<RadzenDataGrid @ref="_table" TItem="IBSPTexture"
+                Data="BSP.Textures"
+                IsLoading="false"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true"
+                AllowColumnPicking="true"
+                AllowColumnResize="true">
+    <Columns>
+        <RadzenDataGridColumn TItem="IBSPTexture" Visible="false" Title="#" Sortable="false" Filterable="false">
+            <Template>
+                @(BSP.Textures.IndexOf(context))
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="IBSPTexture" Title="Name" Property="@nameof(IBSPTexture.Name)" />
+        <RadzenDataGridColumn TItem="IBSPTexture" Title="Texture" Sortable="false" Filterable="false" Property="@nameof(IBSPTexture.Data)">
+            <Template>
+                <BSPTexture Texture="context" Palette="_palette" Style="width:128px;height:128px" />
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Entity" Title="Actions" Sortable="false" Filterable="false">
+            <Template>
+            </Template>
+        </RadzenDataGridColumn>
+
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    [Parameter] public IBSPFileTextures BSP { get; set; } = null!;
+
+    private RadzenDataGrid<IBSPTexture>? _table;
+    private ColorPalette? _palette;
+}

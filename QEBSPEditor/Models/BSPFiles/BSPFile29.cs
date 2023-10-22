@@ -1,8 +1,11 @@
-﻿using System.Text;
+﻿using QEBSPEditor.Core.Extensions;
+using QEBSPEditor.Core.Utilities;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace QEBSPEditor.Models.BSPFiles;
 
-public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPSave
+public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFileTextures, IBSPSave
 {
     public class Face : IBSPWriteable
     {
@@ -51,9 +54,136 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPSa
         }
     }
 
+    public class MipTexture : IBSPTexture, IBSPWriteable
+    {
+        private byte[] _data1 = Array.Empty<byte>();
+        private byte[] _data2 = Array.Empty<byte>();
+        private byte[] _data4 = Array.Empty<byte>();
+        private byte[] _data8 = Array.Empty<byte>();
+
+        public string Name { get; set; } = "";
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public byte[] Data { get => _data1; set => _data1 = value; }
+
+        public static MipTexture Read(BinaryReader reader)
+        {
+            var offset = reader.BaseStream.Position;
+
+            var tex = new MipTexture();
+            tex.Name = reader.ReadFixedSizeString(16);
+            tex.Width = reader.ReadInt32();
+            tex.Height = reader.ReadInt32();
+
+            Span<int> offsets = stackalloc int[4];
+            for (var i = 0; i < offsets.Length; i++)
+                offsets[i] = reader.ReadInt32();
+
+            reader.BaseStream.Seek(offset + offsets[0], SeekOrigin.Begin);
+            tex._data1 = reader.ReadBytes(tex.Width * tex.Height);
+
+            reader.BaseStream.Seek(offset + offsets[1], SeekOrigin.Begin);
+            tex._data2 = reader.ReadBytes((tex.Width / 2) * (tex.Height / 2));
+
+            reader.BaseStream.Seek(offset + offsets[2], SeekOrigin.Begin);
+            tex._data4 = reader.ReadBytes((tex.Width / 4) * (tex.Height / 4));
+
+            reader.BaseStream.Seek(offset + offsets[3], SeekOrigin.Begin);
+            tex._data8 = reader.ReadBytes((tex.Width / 8) * (tex.Height / 8));
+
+            return tex;
+        }
+
+        public void Write(BinaryWriter writer)
+        {
+            var offsetBase = writer.BaseStream.Position;
+            writer.WriteFixedSizeString(this.Name, 16);
+            writer.Write((int)this.Width);
+            writer.Write((int)this.Height);
+
+            var offsets = writer.BaseStream.Position;
+            writer.Write((int)0);
+            writer.Write((int)0);
+            writer.Write((int)0);
+            writer.Write((int)0);
+
+            var ofs1 = writer.BaseStream.Position - offsetBase;
+            writer.Write(this._data1);
+            var ofs2 = writer.BaseStream.Position - offsetBase;
+            writer.Write(this._data2);
+            var ofs4 = writer.BaseStream.Position - offsetBase;
+            writer.Write(this._data4);
+            var ofs8 = writer.BaseStream.Position - offsetBase;
+            writer.Write(this._data8);
+
+
+            // Write the offsets back
+            using (new StreamSeekScope(writer.BaseStream, offsets, SeekOrigin.Begin))
+            {
+                writer.Write((int)ofs1);
+                writer.Write((int)ofs2);
+                writer.Write((int)ofs4);
+                writer.Write((int)ofs8);
+            }
+        }
+    }
+
+    public class MipTextures : IBSPWriteable
+    {
+        public List<MipTexture> Textures { get; set; } = new();
+
+        public static MipTextures Read(BinaryReader reader)
+        {
+            var offset = reader.BaseStream.Position;
+
+            var count = reader.ReadInt32();
+
+            var offsets = new List<int>(count);
+            for(var i=0;i<count;i++)
+                offsets.Add(reader.ReadInt32());
+
+            var textures = new List<MipTexture>(count);
+            for(var i=0;i<count;i++)
+            {
+                reader.BaseStream.Seek(offset + offsets[i], SeekOrigin.Begin);
+
+                textures.Add(MipTexture.Read(reader));
+            }
+
+            return new MipTextures()
+            {
+                Textures = textures
+            };
+        }
+
+        public void Write(BinaryWriter writer)
+        {
+            var offsetBase = writer.BaseStream.Position;
+            writer.Write((int)Textures.Count);
+
+            var offsetListStart = writer.BaseStream.Position;
+            for(var i=0;i<Textures.Count;i++)
+                writer.Write((int)0);
+
+            List<long> offsets = new(Textures.Count);
+            for(var i=0;i<Textures.Count;i++)
+            {
+                offsets.Add(writer.BaseStream.Position - offsetBase);
+                Textures[i].Write(writer);
+            }
+
+            // Write the offsets
+            using(new StreamSeekScope(writer.BaseStream,offsetListStart))
+            {
+                for (var i = 0; i < offsets.Count; i++)
+                    writer.Write((int)offsets[i]);
+            }
+        }
+    }
+
     public string Entities { get; set; } = "";
     public byte[] Planes { get; set; } = Array.Empty<byte>();
-    public byte[] MipTex { get; set; } = Array.Empty<byte>();
+    public MipTextures MipTex { get; set; } = new();
     public byte[] Vertices { get; set; } = Array.Empty<byte>();
     public byte[] Visilist { get; set; } = Array.Empty<byte>();
     public byte[] Nodes { get; set; } = Array.Empty<byte>();
@@ -68,8 +198,10 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPSa
     public byte[] Models { get; set; } = Array.Empty<byte>();
 
 
-    public override BSPCapabilities Capabilities => BSPCapabilities.Entities | BSPCapabilities.Lighting | BSPCapabilities.Saveable;
+    public override BSPCapabilities Capabilities => BSPCapabilities.Entities | BSPCapabilities.Lighting | BSPCapabilities.Saveable | BSPCapabilities.Textures;
     public override string VersionName => "29";
+
+    public List<IBSPTexture> Textures { get => MipTex.Textures.Cast<IBSPTexture>().ToList(); set => throw new NotSupportedException(); }
 
     public void Save(Stream stream)
     {
@@ -122,7 +254,7 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPSa
 
         this.Entities = ReadEntityChunk(headerEntities, reader);
         this.Planes = ReadGenericChunk(headerPlanes, reader);
-        this.MipTex = ReadGenericChunk(headerMiptex, reader);
+        this.MipTex = ReadMipTexChunk(headerMiptex, reader);
         this.Vertices = ReadGenericChunk(headerVertices, reader);
         this.Visilist = ReadGenericChunk(headerVisilist, reader);
         this.Nodes = ReadGenericChunk(headerNodes, reader);
@@ -142,6 +274,12 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPSa
 
 
     #region Load Methods
+
+    private static MipTextures ReadMipTexChunk(ChunkHeader header, BinaryReader reader)
+    {
+        reader.BaseStream.Seek(header.Offset, SeekOrigin.Begin);
+        return MipTextures.Read(reader);
+    }
 
     private static string ReadEntityChunk(ChunkHeader header, BinaryReader reader)
     {

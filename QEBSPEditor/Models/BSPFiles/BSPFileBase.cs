@@ -32,6 +32,21 @@ public abstract class BSPFileBase : IBSPFile
         return reader.ReadBytes(header.Size);
     }
 
+    protected static void WriteChunkAndHeader<TItem>(BinaryWriter writer, int headerNum, TItem content) where TItem : IBSPWriteable
+    {
+        // Write content
+        writer.Seek(0, SeekOrigin.End);
+        var pos = writer.BaseStream.Position;
+
+        content.Write(writer);
+
+        var length = writer.BaseStream.Position - pos;
+
+        // Write header
+        writer.Seek(sizeof(int) + headerNum * ChunkHeader.SizeOf, SeekOrigin.Begin);
+        writer.Write((int)pos);
+        writer.Write((int)length);
+    }
     protected static void WriteChunkAndHeader<TItem>(BinaryWriter writer, int headerNum, List<TItem> content) where TItem : IBSPWriteable
     {
         // Write content

@@ -15,6 +15,6 @@ public static class BinaryReaderExtensions
                 break;
         }
 
-        return Encoding.ASCII.GetString(bytes, 0, size-1);
+        return Encoding.ASCII.GetString(bytes, 0, size);
     }
 }

@@ -145,6 +145,9 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
             var textures = new List<MipTexture>(count);
             for(var i=0;i<count;i++)
             {
+                if (offsets[i] == -1)
+                    continue;
+
                 reader.BaseStream.Seek(offset + offsets[i], SeekOrigin.Begin);
 
                 textures.Add(MipTexture.Read(reader));

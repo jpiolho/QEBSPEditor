@@ -11,3 +11,6 @@ Visit [https://jpiolho.github.io/QEBSPEditor/](https://jpiolho.github.io/QEBSPEd
 - Edit entities via user interface or source directly.
 - Experimental lighting adjustment feature.
 
+## Roadmap
+- Texture editing
+- Theme selection

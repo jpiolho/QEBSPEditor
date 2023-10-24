@@ -1,8 +1,26 @@
 ﻿@using SixLabors.ImageSharp.Formats.Png;
+@using System.Text;
 
-@if (_base64 is not null)
+@if (AnyImage)
 {
-    <img src="data:image/png;base64,@_base64" style="object-fit: contain;@Style" @attributes="Attributes" />
+    <div class="d-inline-flex gap-2" style="@Style" @attributes="Attributes">
+        @if (_base64 != null)
+        {
+            <img src="@_base64" class="bsp-texture w-100 h-100" />
+        }
+        @if (_base64_mipmap2 != null)
+        {
+            <img src="@_base64_mipmap2" class="bsp-texture mipmap2" />
+        }
+        @if (_base64_mipmap4 != null)
+        {
+            <img src="@_base64_mipmap4" class="bsp-texture mipmap4" />
+        }
+        @if (_base64_mipmap8 != null)
+        {
+            <img src="@_base64_mipmap8" class="bsp-texture mipmap8" />
+        }
+    </div>
 }
 else
 {
@@ -12,14 +30,39 @@ else
 }
 
 @code {
+    [Flags]
+    public enum TextureView
+    {
+        Full = 1 << 0,
+        Mipmap2 = 1 << 1,
+        Mipmap4 = 1 << 2,
+        Mipmap8 = 1 << 3,
+
+        AllMipmaps = Mipmap2 | Mipmap4 | Mipmap8,
+        All = Full | AllMipmaps
+    }
+
     [Parameter] public IBSPTexture? Texture { get; set; }
     [Parameter] public ColorPalette? Palette { get; set; }
+
+    [Parameter] public int? Width { get; set; }
+    [Parameter] public int? Height { get; set; }
+
+    [Parameter] public TextureView View { get; set; } = TextureView.Full;
+    [Parameter] public bool OnlyShowFullbright { get; set; }
 
     [Parameter] public string? Style { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
 
-    private string? _base64;
+    private bool _loading = false;
+    private string? _base64, _base64_mipmap2, _base64_mipmap4, _base64_mipmap8;
     private int _previousParameterHash;
+
+
+    private bool AnyImage => !string.IsNullOrEmpty(_base64) ||
+        !string.IsNullOrEmpty(_base64_mipmap2) ||
+        !string.IsNullOrEmpty(_base64_mipmap4) ||
+        !string.IsNullOrEmpty(_base64_mipmap8);
 
     protected override async Task OnParametersSetAsync()
     {
@@ -28,32 +71,80 @@ else
         {
             // Clear previous image
             _base64 = null;
+            _base64_mipmap2 = null;
+            _base64_mipmap4 = null;
+            _base64_mipmap8 = null;
+
             StateHasChanged();
 
             // Load new image
             if (Texture != null && Palette != null)
+            {
                 await Task.Run(LoadImageAsync);
 
-            _previousParameterHash = hash;
+                _previousParameterHash = hash;
+            }
         }
     }
 
     private int CalculateParameterHash()
     {
-        return HashCode.Combine(Texture, Palette);
+        return HashCode.Combine(View, Texture, Palette, OnlyShowFullbright);
     }
 
     private async Task LoadImageAsync()
     {
-        var data = Texture!.Data.Select(index => Palette!.GetColor(index).ToPixel<Rgb24>()).ToArray();
+        if (Texture is null || Palette is null)
+            return;
 
-        using (var image = Image.LoadPixelData<Rgb24>(data, Texture.Width, Texture.Height))
-        using (var ms = new MemoryStream())
+        if (View.HasFlag(TextureView.Full))
         {
-            image.Save(ms, new PngEncoder());
-            _base64 = Convert.ToBase64String(ms.ToArray());
+            using (var image = ConvertTextureDataToImage(Texture.Data, Texture.Width, Texture.Height, Palette, OnlyShowFullbright))
+                _base64 = image.ToBase64String(PngFormat.Instance);
         }
 
+        if (View.HasFlag(TextureView.Mipmap2))
+        {
+            using (var image = ConvertTextureDataToImage(Texture.Data2, Texture.Width / 2, Texture.Height / 2, Palette, OnlyShowFullbright))
+                _base64_mipmap2 = image.ToBase64String(PngFormat.Instance);
+        }
+
+        if (View.HasFlag(TextureView.Mipmap4))
+        {
+            using (var image = ConvertTextureDataToImage(Texture.Data4, Texture.Width / 4, Texture.Height / 4, Palette, OnlyShowFullbright))
+                _base64_mipmap4 = image.ToBase64String(PngFormat.Instance);
+        }
+
+        if (View.HasFlag(TextureView.Mipmap8))
+        {
+            using (var image = ConvertTextureDataToImage(Texture.Data8, Texture.Width / 8, Texture.Height / 8, Palette, OnlyShowFullbright))
+                _base64_mipmap8 = image.ToBase64String(PngFormat.Instance);
+        }
+
+        StateHasChanged();
         await Task.Yield();
+    }
+
+    private Image<Rgb24> ConvertTextureDataToImage(byte[] data, int width, int height, ColorPalette palette, bool onlyFullbrights)
+    {
+        Rgb24[] colorData;
+
+        if (!onlyFullbrights)
+        {
+            colorData = data
+                .Select(index => palette.GetColor(index).ToPixel<Rgb24>())
+                .ToArray();
+        }
+        else
+        {
+            // Filter by fullbrights
+            colorData = data
+                .Select(index =>
+                    (index >= palette.FullBrightStart && index <= palette.FullBrightEnd ? palette.GetColor(index) : Color.Black).ToPixel<Rgb24>()
+                )
+                .ToArray();
+        }
+
+        return Image.LoadPixelData<Rgb24>(colorData, width, height);
     }
 }

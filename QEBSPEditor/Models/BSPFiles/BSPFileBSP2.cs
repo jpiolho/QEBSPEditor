@@ -56,18 +56,8 @@ public class BSPFileBSP2 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSP
         }
     }
 
-    public class MipTexture : IBSPTexture, IBSPWriteable
+    public class MipTexture : BSPTextureBase, IBSPWriteable
     {
-        private byte[] _data1 = Array.Empty<byte>();
-        private byte[] _data2 = Array.Empty<byte>();
-        private byte[] _data4 = Array.Empty<byte>();
-        private byte[] _data8 = Array.Empty<byte>();
-
-        public string Name { get; set; } = "";
-        public int Width { get; set; }
-        public int Height { get; set; }
-        public byte[] Data { get => _data1; set => _data1 = value; }
-
         public static MipTexture Read(BinaryReader reader)
         {
             var offset = reader.BaseStream.Position;

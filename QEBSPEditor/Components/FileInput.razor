@@ -1,16 +1,10 @@
 ﻿@using Tewr.Blazor.FileReader;
 @inject IFileReaderService FileReaderService
+@inject IJSRuntime JSRuntime
 
-<div class="@(_isLoading ? "visually-hidden" : "")">
-    <input @ref="_input" type="file" @onchange="LoadFileAsync" />
-</div>
+<label for="@_id" @attributes="@Attributes">@ChildContent</label>
+<input @ref="_input" id="@_id" type="file" @onchange="LoadFileAsync" />
 
-@if (_isLoading)
-{
-    <div class="d-flex justify-content-center">
-        <Spinner />
-    </div>
-}
 
 @code {
     public class FileLoadEventArgs
@@ -20,37 +14,35 @@
     }
 
     [Parameter] public EventCallback<FileLoadEventArgs> FileLoad { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
 
+    private string _id = Guid.NewGuid().ToString();
     private ElementReference _input;
-    private bool _isLoading;
 
     private async Task LoadFileAsync()
     {
-        _isLoading = true;
-        StateHasChanged();
+        var file = (await FileReaderService.CreateReference(_input).EnumerateFilesAsync()).FirstOrDefault();
 
-        try
+        if (file is null)
+            return;
+
+        var info = await file.ReadFileInfoAsync();
+
+        using (var memoryStream = await file.CreateMemoryStreamAsync(4096))
         {
-            var file = (await FileReaderService.CreateReference(_input).EnumerateFilesAsync()).FirstOrDefault();
-
-            if (file is null)
-                return;
-
-            var info = await file.ReadFileInfoAsync();
-
-            using (var memoryStream = await file.CreateMemoryStreamAsync(4096))
-            {
-                await FileLoad.InvokeAsync(new()
-                    {
-                        Info = info,
-                        Stream = memoryStream
-                    });
-            }
+            await FileLoad.InvokeAsync(new()
+                {
+                    Info = info,
+                    Stream = memoryStream
+                });
         }
-        finally
-        {
-            _isLoading = false;
-            StateHasChanged();
-        }
+
     }
+
+    public async Task OpenAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("clickElement", _input);
+    }
+
 }

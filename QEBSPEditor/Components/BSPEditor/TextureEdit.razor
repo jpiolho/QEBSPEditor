@@ -1,0 +1,110 @@
+﻿@using QEBSPEditor.Models.BSPFiles;
+@using System.Text;
+@using SixLabors.ImageSharp.Formats.Png;
+@using SixLabors.ImageSharp.Processing.Processors.Quantization;
+@using System.Runtime.InteropServices;
+@inject DialogService DialogService
+
+
+<PromptDialogs @ref="_promptDialogs" />
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col d-flex justify-content-center">
+            <RadzenRadioButtonList @bind-Value="@_viewMode" class="mb-2">
+                <Items>
+                    <RadzenRadioButtonListItem Text="View Regular" Value="ViewMode.Regular" />
+                    <RadzenRadioButtonListItem Text="View Mipmaps" Value="ViewMode.Mipmaps" />
+                    <RadzenRadioButtonListItem Text="View Fullbrights" Value="ViewMode.Fullbrights" />
+                </Items>
+            </RadzenRadioButtonList>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col d-flex justify-content-center">
+            <div class="rz-text-align-center">
+                <RadzenCheckBox @bind-Value="@_avoidFullbrights" Name="AvoidFullbrights" />
+                <RadzenLabel Text="Do not import with fullbrights" Component="AvoidFullbrights" Style="margin-left: 8px; vertical-align: middle;" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col d-flex flex-column align-items-center">
+            <BSPTexture Texture="Texture" Palette="Palette" Style="width: 256px;height:256px" View="@GetBSPTextureViewMode()" OnlyShowFullbright="_viewMode == ViewMode.Fullbrights" />
+            <div class="text-align-center">@Texture.Width x @Texture.Height</div>
+        </div>
+        <div class="col d-flex align-items-center justify-content-center display-1">
+            ➡️
+        </div>
+        <div class="col d-flex flex-column align-items-center">
+
+            <TextureConvertInput PreviewWidth="256px"
+                                 PreviewHeight="256px"
+                                 TextureWidth="@Texture.Width"
+                                 TextureHeight="@Texture.Height"
+                                 Palette="@Palette"
+                                 AvoidFullbright="_avoidFullbrights"
+                                 View="@GetBSPTextureViewMode()"
+                                 OnlyShowFullbright="_viewMode == ViewMode.Fullbrights"
+            @bind-Texture="_newTexture" />
+
+            @if (_newTexture is not null)
+            {
+                <div class="text-align-center">@Texture.Width x @Texture.Height</div>
+            }
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <RadzenButton Click="SaveAsync" Disabled="_newTexture is null" Text="Save" />
+        </div>
+    </div>
+</div>
+
+@code {
+    private enum ViewMode
+    {
+        Regular,
+        Mipmaps,
+        Fullbrights
+    }
+
+    [Parameter, EditorRequired] public IBSPTexture Texture { get; set; } = null!;
+    [Parameter, EditorRequired] public ColorPalette Palette { get; set; } = null!;
+
+    private PromptDialogs? _promptDialogs;
+    private IBSPTexture? _newTexture;
+    private bool _avoidFullbrights;
+
+    private ViewMode _viewMode;
+
+    private Task SaveAsync()
+    {
+        Texture.Data = _newTexture!.Data;
+        Texture.Data2 = _newTexture.Data2;
+        Texture.Data4 = _newTexture.Data4;
+        Texture.Data8 = _newTexture.Data8;
+
+        DialogService.Close(true);
+
+        return Task.CompletedTask;
+    }
+
+    private BSPTexture.TextureView GetBSPTextureViewMode()
+    {
+        if (_viewMode == ViewMode.Mipmaps)
+            return BSPTexture.TextureView.AllMipmaps;
+
+        return BSPTexture.TextureView.Full;
+    }
+
+
+    public static async Task<dynamic?> OpenAsync(DialogService dialogService, IBSPTexture texture, ColorPalette palette)
+    {
+        return await dialogService.OpenAsync<TextureEdit>("Edit texture", new()
+        {
+            { nameof(TextureEdit.Texture), texture },
+            { nameof(TextureEdit.Palette), palette }
+        }, new() { CloseDialogOnEsc = true, ShowClose = true, Width = "50%" });
+    }
+}

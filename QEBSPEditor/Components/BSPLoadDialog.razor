@@ -4,22 +4,19 @@
 @inject DialogService DialogService
 @inject IFileReaderService FileReaderService
 
-<div>
-    <FileInput FileLoad="Load" />
+<PromptDialogs @ref="_dialogs" />
 
-    @if (!string.IsNullOrEmpty(_error))
-    {
-        <div class="text-danger">
-            @_error
-        </div>
-    }
+<div>
+    <FileInputBox FileLoad="LoadAsync" class="w-100">
+        Click or drag a BSP file to load it
+    </FileInputBox>
 </div>
 
 
 @code {
-    private string? _error;
+    private PromptDialogs _dialogs = null!;
 
-    private void Load(FileInput.FileLoadEventArgs args)
+    private async Task LoadAsync(FileInput.FileLoadEventArgs args)
     {
         IBSPFile bsp;
         try
@@ -28,12 +25,12 @@
         }
         catch (InvalidDataException ex)
         {
-            _error = $"Failed to load: {ex.Message}";
+            await _dialogs.FailureAsync($"Failed to load: {ex.Message}");
             return;
         }
         catch (Exception ex)
         {
-            _error = $"Failed to load: {ex}";
+            await _dialogs.FailureAsync($"Failed to load: {ex}");
             return;
         }
 

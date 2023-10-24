@@ -1,0 +1,19 @@
+﻿.bsp-texture {
+    object-fit:contain;
+    image-rendering:pixelated;
+}
+
+.mipmap2 {
+    width: 50%;
+    height: 50%;
+}
+
+.mipmap4 {
+    width: 25%;
+    height: 25%;
+}
+
+.mipmap8 {
+    width: 12.5%;
+    height: 12.5%;
+}

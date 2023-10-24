@@ -7,6 +7,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="Components\TextureConvertInput.razor.css" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Components\TextureConvertInput.razor.css" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="BlazorDownloadFileFast" Version="0.2.0" />
 		<PackageReference Include="CurrieTechnologies.Razor.SweetAlert2" Version="5.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.12" />

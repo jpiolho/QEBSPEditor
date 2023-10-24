@@ -1,0 +1,47 @@
+﻿<FileInput @ref="_input" FileLoad="FileLoad" @attributes="Attributes">
+    <RadzenButton Click="OpenAsync" ButtonStyle="ButtonStyle.Light">
+        @if (_spinner)
+        {
+            <Spinner />
+        }
+        else
+        {
+            @ChildContent
+        }
+    </RadzenButton>
+</FileInput>
+
+@code {
+    [Parameter] public EventCallback<FileInput.FileLoadEventArgs> FileLoad { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+
+    private FileInput? _input;
+    private bool _spinner;
+
+    private async Task OnFileLoadAsync()
+    {
+        try
+        {
+            _spinner = true;
+            StateHasChanged();
+
+            await Task.Run(FileLoad.InvokeAsync);
+        }
+        finally
+        {
+            _spinner = false;
+            StateHasChanged();
+        }
+    }
+
+    public async Task OpenAsync()
+    {
+        // Is it loading?
+        if (_spinner)
+            return;
+
+        if (_input is not null)
+            await _input.OpenAsync();
+    }
+}

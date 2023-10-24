@@ -1,9 +1,10 @@
 ﻿@using QEBSPEditor.Models.BSPFiles;
 @using SixLabors.ImageSharp.Formats.Png;
+@inject DialogService DialogService
 
-<div>Palette: <ColorPaletteChoser @bind-ColorPalette="_palette" /></div>
+<div>Palette: <ColorPaletteDropdown @bind-ColorPalette="_palette" /></div>
 
-@if(_palette is null)
+@if (_palette is null)
 {
     <RadzenText TextStyle="TextStyle.H5" class="mt-2">
         You need to upload a palette in the settings before you're able to view textures
@@ -12,8 +13,8 @@
 }
 
 <RadzenDataGrid @ref="_table" TItem="IBSPTexture"
-                Data="BSP.Textures"
-                IsLoading="false"
+                Data="_data"
+                PagerPosition="PagerPosition.TopAndBottom"
                 AllowPaging="true"
                 AllowSorting="true"
                 AllowFiltering="true"
@@ -22,7 +23,7 @@
     <Columns>
         <RadzenDataGridColumn TItem="IBSPTexture" Visible="false" Title="#" Sortable="false" Filterable="false">
             <Template>
-                @(BSP.Textures.IndexOf(context))
+                @(_data!.IndexOf(context))
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TItem="IBSPTexture" Title="Name" Property="@nameof(IBSPTexture.Name)" />
@@ -31,9 +32,26 @@
                 <BSPTexture Texture="context" Palette="_palette" Style="width:128px;height:128px" />
             </Template>
         </RadzenDataGridColumn>
-
-        <RadzenDataGridColumn TItem="Entity" Title="Actions" Sortable="false" Filterable="false">
+        <RadzenDataGridColumn TItem="IBSPTexture" Visible="false" Title="Fullbrights" Sortable="false" Filterable="false">
             <Template>
+                <BSPTexture Texture="context" Palette="_palette" OnlyShowFullbright="true" Style="width:128px;height:128px" />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="IBSPTexture" Visible="false" Title="Mipmaps" Sortable="false" Filterable="false">
+            <Template>
+                <BSPTexture Texture="context" Palette="_palette" View="BSPTexture.TextureView.AllMipmaps" Style="width:128px;height:128px" />
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="IBSPTexture" Visible="false" Title="Mipmaps Fullbrights" Sortable="false" Filterable="false">
+            <Template>
+                <BSPTexture Texture="context" Palette="_palette" View="BSPTexture.TextureView.AllMipmaps" OnlyShowFullbright="true" Style="width:128px;height:128px" />
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="IBSPTexture" Title="Actions" Sortable="false" Filterable="false">
+            <Template>
+                <RadzenButton Text="Edit" ButtonStyle="ButtonStyle.Secondary" Click="() => EditTextureAsync(context)" />
             </Template>
         </RadzenDataGridColumn>
 
@@ -45,4 +63,20 @@
 
     private RadzenDataGrid<IBSPTexture>? _table;
     private ColorPalette? _palette;
+    private List<IBSPTexture>? _data;
+
+    protected override void OnParametersSet()
+    {
+        _data = BSP?.Textures;
+    }
+
+    private async Task EditTextureAsync(IBSPTexture texture)
+    {
+        if (_palette is null)
+            throw new InvalidOperationException("Cannot edit a texture without a palette");
+
+        var result = await TextureEdit.OpenAsync(DialogService, texture, _palette);
+        if (result is not null)
+            await _table!.UpdateRow(texture);
+    }
 }

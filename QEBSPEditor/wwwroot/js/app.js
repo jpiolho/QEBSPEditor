@@ -15,3 +15,7 @@ function setTextareaSelection(element, pos) {
     element.blur();
     element.focus();
 }
+
+function clickElement(element) {
+    element.click();
+}

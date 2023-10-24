@@ -15,7 +15,13 @@
         @foreach(var palette in _settings.ColorPalettes) {
             <div class="row mb-2">
                 <div class="col-md">
-                    <RadzenTextBox @bind-Value="palette.Name" class="w-100" />
+                    <RadzenTextBox Placeholder="Name" @bind-Value="palette.Name" class="w-100" />
+                </div>
+                <div class="col-md">
+                    <RadzenNumeric Placeholder="Fullbright start index" @bind-Value="palette.FullBrightStart" Min="0" Max="palette.FullBrightEnd" class="w-100" />
+                </div>
+                <div class="col-md">
+                    <RadzenNumeric Placeholder="Fullbright end index"  @bind-Value="palette.FullBrightEnd" Min="palette.FullBrightStart" Max="255" class="w-100" />
                 </div>
                 <div class="col-md-auto">
                     <RadzenButton Text="Delete" ButtonStyle="ButtonStyle.Danger" Click="() => _settings.ColorPalettes.Remove(palette)" Style="width: 100px" />
@@ -23,8 +29,10 @@
             </div>
         }
 
-        <FileInput FileLoad="PaletteUploadedAsync" />
+        <FileInputButton FileLoad="PaletteUploadedAsync">Add palette</FileInputButton>
     </SettingsSection>
+    
+    <hr/>
 
     <SettingsSection>
         <RadzenButton ButtonStyle="ButtonStyle.Primary" Text="Save" Click="OnSaveClickedAsync" />
@@ -42,7 +50,7 @@
         _settings = new()
             {
                 ExperimentalMode = settings.ExperimentalMode,
-                ColorPalettes = new(settings.ColorPalettes),
+                ColorPalettes = new(settings.ColorPalettes.Select(c => (ColorPalette)c.Clone())),
             };
     }
 

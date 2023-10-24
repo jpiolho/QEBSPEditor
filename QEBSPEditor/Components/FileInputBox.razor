@@ -1,0 +1,15 @@
+﻿<FileInput FileLoad="FileLoad" @attributes="Attributes">
+    <div class="input-box w-100 h-100 p-5">
+        @ChildContent
+    </div>
+</FileInput>
+
+@code {
+    [Parameter] public EventCallback<FileInput.FileLoadEventArgs> FileLoad { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    
+    [Parameter] public bool ShowSpinner { get; set; }
+
+    
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+}

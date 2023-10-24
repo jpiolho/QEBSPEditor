@@ -1,0 +1,149 @@
+﻿@using QEBSPEditor.Core.Extensions;
+@using SixLabors.ImageSharp.Processing.Processors.Quantization;
+@using System.Text;
+
+<PromptDialogs @ref="_dialogs" />
+
+<FileInput FileLoad="OnFileLoadAsync">
+    @if (_loadingProgress is null && Texture is not null)
+    {
+        <BSPTexture Texture="@Texture" 
+            Palette="@Palette" 
+            Style="@GetWidthHeightStyle()" 
+            OnlyShowFullbright="@OnlyShowFullbright"
+            View="@View" 
+        />
+    }
+    else
+    {
+        <div class="input-box" style="@GetWidthHeightStyle()">
+            @if (_loadingProgress is null)
+            {
+                <text>Click to upload image<br />Drag and drop image</text>
+            }
+            else
+            {
+                @_loadingProgress
+            }
+        </div>
+    }
+</FileInput>
+
+@code {
+    [Parameter, EditorRequired] public ColorPalette Palette { get; set; } = null!;
+    [Parameter, EditorRequired] public string PreviewWidth { get; set; } = "256px";
+    [Parameter, EditorRequired] public string PreviewHeight { get; set; } = "256px";
+    [Parameter] public int TextureWidth { get; set; }
+    [Parameter] public int TextureHeight { get; set; }
+    [Parameter] public IBSPTexture? Texture { get; set; }
+    [Parameter] public EventCallback<IBSPTexture> TextureChanged { get; set; }
+    [Parameter] public bool AvoidFullbright { get; set; }
+    [Parameter] public bool OnlyShowFullbright { get; set; }
+    [Parameter] public BSPTexture.TextureView View { get; set; } = BSPTexture.TextureView.Full;
+
+    private Image<Rgb24>? _image;
+
+    private int _previousArgs;
+    private PromptDialogs _dialogs = null!;
+
+    public class PreviewTexture : IBSPTexture
+    {
+        public string Name { get; set; } = "Preview";
+        public int Width { get; set; } = 0;
+        public int Height { get; set; } = 0;
+        public byte[] Data { get; set; } = Array.Empty<byte>();
+        public byte[] Data2 { get; set; } = Array.Empty<byte>();
+        public byte[] Data4 { get; set; } = Array.Empty<byte>();
+        public byte[] Data8 { get; set; } = Array.Empty<byte>();
+    }
+
+    private string? _loadingProgress;
+
+    private string GetWidthHeightStyle()
+    {
+        return $"width:{PreviewWidth};height:{PreviewHeight}";
+    }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var hash = HashCode.Combine(Palette,AvoidFullbright,TextureWidth,TextureHeight);
+
+        if(hash != _previousArgs)
+        {
+            if(_image is not null) {
+                try
+                {
+                    await RegenerateTextureAsync(_image);
+                }
+                finally
+                {
+                    await SetProgressAsync(null);
+                }
+            }
+
+            _previousArgs = hash;
+        }
+    }
+
+    private async Task OnFileLoadAsync(FileInput.FileLoadEventArgs args)
+    {
+        try
+        {
+            await SetProgressAsync("Loading...");
+            var image = await Image.LoadAsync<Rgb24>(args.Stream);
+
+            await RegenerateTextureAsync(image);
+
+            _image = image;
+        }
+        catch (UnknownImageFormatException)
+        {
+            await _dialogs.FailureAsync("Failed to load image", "Unsupported image format");
+        }
+        catch(Exception ex)
+        {
+            await _dialogs.FailureAsync("Failed to load image", $"Error: {ex}");
+        }
+        finally
+        {
+            await SetProgressAsync(null);
+        }
+    }
+
+    private async Task RegenerateTextureAsync(Image<Rgb24> originalImage)
+    {
+        var previewTexture = new PreviewTexture();
+
+        await SetProgressAsync("Resizing...");
+        var image = originalImage.Clone(context => context.Resize(TextureWidth, TextureHeight));
+
+        await SetProgressAsync("Quantizing...");
+        var quantizer = new PaletteQuantizer(AvoidFullbright ? Palette.GetAllColorsWithoutFullbright() : Palette.GetAllColors());
+        image.Mutate(context => context.Quantize(quantizer));
+
+        await SetProgressAsync("Converting to palette...");
+        previewTexture.Data = image.ConvertToPalette(Palette);
+
+        await SetProgressAsync("Generating mipmap 1/3...");
+        previewTexture.Data2 = originalImage.Clone(context => context.Resize(image.Width / 2, image.Height / 2).Quantize(quantizer)).ConvertToPalette(Palette);
+
+        await SetProgressAsync("Generating mipmap 2/3...");
+        previewTexture.Data4 = originalImage.Clone(context => context.Resize(image.Width / 4, image.Height / 4).Quantize(quantizer)).ConvertToPalette(Palette);
+
+        await SetProgressAsync("Generating mipmap 3/3...");
+        previewTexture.Data8 = originalImage.Clone(context => context.Resize(image.Width / 8, image.Height / 8).Quantize(quantizer)).ConvertToPalette(Palette);
+
+        previewTexture.Width = image.Width;
+        previewTexture.Height = image.Height;
+
+        await TextureChanged.InvokeAsync(previewTexture);
+    }
+
+    private async Task SetProgressAsync(string? text)
+    {
+        _loadingProgress = text;
+        StateHasChanged();
+        await Task.Yield();
+    }
+}

@@ -51,6 +51,7 @@
             {
                 ExperimentalMode = settings.ExperimentalMode,
                 ColorPalettes = new(settings.ColorPalettes.Select(c => (ColorPalette)c.Clone())),
+                EntitiesPreferSource = settings.EntitiesPreferSource
             };
     }
 

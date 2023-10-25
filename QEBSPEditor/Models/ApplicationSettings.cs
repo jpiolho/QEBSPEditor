@@ -6,4 +6,5 @@ public class ApplicationSettings
     public bool ExperimentalMode { get; set; } = false;
     public List<ColorPalette> ColorPalettes { get; set; } = new();
     public bool EntitiesPreferSource { get; set; } = false;
+    public string Theme { get; set; } = "material";
 }

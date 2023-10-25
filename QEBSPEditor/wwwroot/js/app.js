@@ -19,3 +19,7 @@ function setTextareaSelection(element, pos) {
 function clickElement(element) {
     element.click();
 }
+
+function changeRadzenTheme(newTheme) {
+    document.querySelector("link[radzen-theme=true]").setAttribute("href", `_content/Radzen.Blazor/css/${newTheme}.css`);
+}

@@ -1,0 +1,20 @@
+﻿@typeparam TValue
+<SettingsRow Label="@Label" LabelComponentName="@_name" HelpText="@HelpText">
+    <RadzenDropDown Name="@_name" TValue="@TValue" Value="@Value" ValueChanged="@ValueChanged" Data="@Data" Template="@(Template!)" />
+</SettingsRow>
+
+@code {
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public TValue Value { get; set; } = default(TValue)!;
+    [Parameter] public IEnumerable<TValue>? Data { get; set; }
+    [Parameter] public EventCallback<TValue> ValueChanged { get; set; }
+    [Parameter] public RenderFragment<dynamic>? Template { get; set; }
+    [Parameter] public string? HelpText { get; set; }
+
+    private string? _name;
+
+    protected override void OnInitialized()
+    {
+        _name = Guid.NewGuid().ToString();
+    }
+}

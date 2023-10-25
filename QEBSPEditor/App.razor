@@ -8,6 +8,7 @@
 @inject IFileReaderService FileReaderService
 @inject IBlazorDownloadFileService BlazorDownloadFileService
 @inject ApplicationSettingsService ApplicationSettingsService
+@inject ThemeService ThemeService
 
 <RadzenDialog />
 
@@ -49,8 +50,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ApplicationSettingsService.Changed += (_,_) => StateHasChanged();
+        ApplicationSettingsService.Changed += OnSettingsChangedAsync;
         await ApplicationSettingsService.LoadAsync();
+    }
+
+    private async void OnSettingsChangedAsync(object? sender, ApplicationSettings settings)
+    {
+        await ThemeService.ChangeThemeAsync(settings.Theme);
+        StateHasChanged();
     }
 
     private async Task OpenLoadDialogAsync()

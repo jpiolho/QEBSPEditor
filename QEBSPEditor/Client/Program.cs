@@ -17,11 +17,14 @@ namespace QEBSPEditor
 
             builder.Services.AddSweetAlert2();
             builder.Services.AddBlazorDownloadFile();
+
             builder.Services.AddScoped<TooltipService>();
             builder.Services.AddScoped<DialogService>();
             builder.Services.AddScoped<ApplicationSettingsService>();
-            builder.Services.AddFileReaderService(options => options.UseWasmSharedBuffer = true);
+            builder.Services.AddScoped<ThemeService>();
+
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddFileReaderService(options => options.UseWasmSharedBuffer = true);
 
             await builder.Build().RunAsync();
         }

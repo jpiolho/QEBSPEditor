@@ -1,18 +1,25 @@
 ﻿@using QEBSPEditor.Components.Settings
 @inject ApplicationSettingsService ApplicationSettings
 @inject DialogService DialogService
+@inject ThemeService ThemeService
 
 <PromptDialogs @ref="_dialogs" />
 
 <div>
     <SettingsSection Title="General">
-        <SettingsBool Label="Experimetal mode" @bind-Value="_settings.ExperimentalMode" />
+        <SettingsInputDropdown Label="Theme" @bind-Value="_settings.Theme" Data="@ThemeService.GetThemes()" HelpText="These themes are provided by Radzen (https://blazor.radzen.com/themes) and there could be some incompatibilities between each other">
+            <Template>
+                <span class="text-capitalize">@context</span>
+            </Template>
+        </SettingsInputDropdown>
+        <SettingsInputBool Label="Experimental mode" @bind-Value="_settings.ExperimentalMode" />
     </SettingsSection>
     <SettingsSection Title="Entities">
-        <SettingsBool Label="Prefer source to UI" @bind-Value="_settings.EntitiesPreferSource" />
+        <SettingsInputBool Label="Prefer source to UI" @bind-Value="_settings.EntitiesPreferSource" />
     </SettingsSection>
-    <SettingsSection Title="Palettes">
-        @foreach(var palette in _settings.ColorPalettes) {
+    <SettingsSection Title="Palettes" HelpText="Palettes used for texture rendering. They're usually .lmp format. You can specify the name for your convinience, plus the start and end index of the fullbrights colors in case they're different from default">
+        @foreach (var palette in _settings.ColorPalettes)
+        {
             <div class="row mb-2">
                 <div class="col-md">
                     <RadzenTextBox Placeholder="Name" @bind-Value="palette.Name" class="w-100" />
@@ -21,7 +28,7 @@
                     <RadzenNumeric Placeholder="Fullbright start index" @bind-Value="palette.FullBrightStart" Min="0" Max="palette.FullBrightEnd" class="w-100" />
                 </div>
                 <div class="col-md">
-                    <RadzenNumeric Placeholder="Fullbright end index"  @bind-Value="palette.FullBrightEnd" Min="palette.FullBrightStart" Max="255" class="w-100" />
+                    <RadzenNumeric Placeholder="Fullbright end index" @bind-Value="palette.FullBrightEnd" Min="palette.FullBrightStart" Max="255" class="w-100" />
                 </div>
                 <div class="col-md-auto">
                     <RadzenButton Text="Delete" ButtonStyle="ButtonStyle.Danger" Click="() => _settings.ColorPalettes.Remove(palette)" Style="width: 100px" />
@@ -31,8 +38,8 @@
 
         <FileInputButton FileLoad="PaletteUploadedAsync">Add palette</FileInputButton>
     </SettingsSection>
-    
-    <hr/>
+
+    <hr />
 
     <SettingsSection>
         <RadzenButton ButtonStyle="ButtonStyle.Primary" Text="Save" Click="OnSaveClickedAsync" />
@@ -51,7 +58,8 @@
             {
                 ExperimentalMode = settings.ExperimentalMode,
                 ColorPalettes = new(settings.ColorPalettes.Select(c => (ColorPalette)c.Clone())),
-                EntitiesPreferSource = settings.EntitiesPreferSource
+                EntitiesPreferSource = settings.EntitiesPreferSource,
+                Theme = settings.Theme
             };
     }
 
@@ -75,7 +83,7 @@
         }
         _settings.ColorPalettes.Add(new ColorPalette()
             {
-                Name = $"Palette {_settings.ColorPalettes.Count+1}",
+                Name = $"Palette {_settings.ColorPalettes.Count + 1}",
                 Palette = palette
             });
 

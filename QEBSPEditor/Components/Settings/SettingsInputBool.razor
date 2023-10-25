@@ -1,10 +1,12 @@
-﻿<RadzenCheckBox Name="@_name" Value="@Value" ValueChanged="ValueChanged" TValue="bool" />
-<RadzenLabel Text="@Label" Component="@_name" Style="margin-left: 8px; vertical-align: middle;" />
+﻿<SettingsRow Label="@Label" LabelComponentName="@_name" HelpText="@HelpText">
+    <RadzenCheckBox Name="@_name" Value="@Value" ValueChanged="ValueChanged" TValue="bool" />
+</SettingsRow>
 
 @code {
     [Parameter] public string? Label { get; set; }
     [Parameter] public bool Value { get; set; }
     [Parameter] public EventCallback<bool> ValueChanged { get; set; }
+    [Parameter] public string? HelpText { get; set; }
 
     private string? _name;
 

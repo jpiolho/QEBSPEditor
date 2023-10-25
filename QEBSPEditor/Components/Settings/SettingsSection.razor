@@ -1,5 +1,11 @@
 ﻿<section class="mb-2 @Class">
-    <RadzenText TextStyle="TextStyle.H4" Text="@Title" />
+    <RadzenText TextStyle="TextStyle.H4">
+        @Title
+        @if (HelpText != null)
+        {
+            <InfoBubble  Text="@HelpText" />
+        }
+    </RadzenText>
     <div>
         @ChildContent
     </div>
@@ -9,4 +15,5 @@
     [Parameter] public string? Title { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public string Class { get; set; }
+    [Parameter] public string? HelpText { get; set; }
 }

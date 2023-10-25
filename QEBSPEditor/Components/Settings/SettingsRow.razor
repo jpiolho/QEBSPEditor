@@ -1,0 +1,25 @@
+﻿<div class="row mb-3">
+    <div class="col-4 d-flex align-items-center justify-content-end">
+        @if (HelpText is not null)
+        {
+            <RadzenLabel Text="@Label" Component="@LabelComponentName" />
+            <InfoBubble Text="@HelpText" />
+        }
+        else
+        {
+            <RadzenLabel Text="@($"{Label}:")" Component="@LabelComponentName" />
+        }
+    </div>
+    <div class="col d-flex align-items-center">
+        @ChildContent
+    </div>
+
+    
+</div>
+
+@code {
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? LabelComponentName { get; set; }
+    [Parameter] public string? HelpText { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

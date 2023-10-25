@@ -8,7 +8,7 @@ namespace QEBSPEditor.Services
     {
         public event EventHandler<ApplicationSettings>? Changed;
         public ApplicationSettings Settings => _settings;
-        
+
         private ApplicationSettings _settings = new();
         private readonly IJSRuntime _jsRuntime;
 

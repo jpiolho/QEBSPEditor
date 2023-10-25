@@ -2,7 +2,7 @@
 
 public interface IBSPTexture
 {
-    string Name { get; set; } 
+    string Name { get; set; }
     int Width { get; set; }
     int Height { get; set; }
     byte[] Data { get; set; }

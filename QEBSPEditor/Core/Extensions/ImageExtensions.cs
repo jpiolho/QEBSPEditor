@@ -18,7 +18,7 @@ public static class ImageExtensions
                 {
                     ref var pixel = ref row[x];
 
-                    var colorIdx = palette.FindColor(pixel.R,pixel.G, pixel.B);
+                    var colorIdx = palette.FindColor(pixel.R, pixel.G, pixel.B);
                     if (colorIdx == -1)
                         throw new Exception("Failed to find matching color");
 

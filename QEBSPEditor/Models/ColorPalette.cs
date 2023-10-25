@@ -7,7 +7,7 @@ public class ColorPalette : ICloneable
     public int FullBrightStart { get; set; } = 224;
     public int FullBrightEnd { get; set; } = 255;
 
-    public int FindColor(byte r,byte g, byte b)
+    public int FindColor(byte r, byte g, byte b)
     {
         var num = (r << 16) | (g << 8) | b;
         return Array.IndexOf(Palette, num);
@@ -26,7 +26,7 @@ public class ColorPalette : ICloneable
     public Color[] GetAllColors()
     {
         var colors = new Color[Palette.Length];
-        for(var i=0;i<Palette.Length; i++)
+        for (var i = 0; i < Palette.Length; i++)
             colors[i] = GetColor(i);
         return colors;
     }
@@ -38,8 +38,9 @@ public class ColorPalette : ICloneable
 
     public object Clone()
     {
-        return new ColorPalette() { 
-            Name = Name, 
+        return new ColorPalette()
+        {
+            Name = Name,
             Palette = Palette.ToArray(),
             FullBrightStart = FullBrightStart,
             FullBrightEnd = FullBrightEnd,

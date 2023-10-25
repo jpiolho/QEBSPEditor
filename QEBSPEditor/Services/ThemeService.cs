@@ -23,7 +23,7 @@ public class ThemeService
 
     public string[] GetThemes()
     {
-        return Themes;    
+        return Themes;
     }
 
     public async Task ChangeThemeAsync(string newTheme)

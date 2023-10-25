@@ -9,7 +9,7 @@ public static class BinaryReaderExtensions
         var bytes = reader.ReadBytes(length);
 
         int size = 0;
-        for(size=0;size<length;size++)
+        for (size = 0; size < length; size++)
         {
             if (bytes[size] == 0)
                 break;

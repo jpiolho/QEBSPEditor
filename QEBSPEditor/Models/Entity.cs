@@ -47,5 +47,5 @@ public class Entity
     public bool TryGetKeyValueVector(string key, [NotNullWhen(true)] out Vector3? value) => (value = GetKeyValueVector(key)).HasValue;
 
 
-    public override int GetHashCode() => HashCode.Combine(KeyValues,SourceHint);
+    public override int GetHashCode() => HashCode.Combine(KeyValues, SourceHint);
 }

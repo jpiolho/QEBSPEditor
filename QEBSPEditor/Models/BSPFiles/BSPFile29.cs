@@ -1,6 +1,5 @@
 ﻿using QEBSPEditor.Core.Extensions;
 using QEBSPEditor.Core.Utilities;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace QEBSPEditor.Models.BSPFiles;
@@ -129,11 +128,11 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
             var count = reader.ReadInt32();
 
             var offsets = new List<int>(count);
-            for(var i=0;i<count;i++)
+            for (var i = 0; i < count; i++)
                 offsets.Add(reader.ReadInt32());
 
             var textures = new List<MipTexture>(count);
-            for(var i=0;i<count;i++)
+            for (var i = 0; i < count; i++)
             {
                 if (offsets[i] == -1)
                     continue;
@@ -155,18 +154,18 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
             writer.Write((int)Textures.Count);
 
             var offsetListStart = writer.BaseStream.Position;
-            for(var i=0;i<Textures.Count;i++)
+            for (var i = 0; i < Textures.Count; i++)
                 writer.Write((int)0);
 
             List<long> offsets = new(Textures.Count);
-            for(var i=0;i<Textures.Count;i++)
+            for (var i = 0; i < Textures.Count; i++)
             {
                 offsets.Add(writer.BaseStream.Position - offsetBase);
                 Textures[i].Write(writer);
             }
 
             // Write the offsets
-            using(new StreamSeekScope(writer.BaseStream,offsetListStart))
+            using (new StreamSeekScope(writer.BaseStream, offsetListStart))
             {
                 for (var i = 0; i < offsets.Count; i++)
                     writer.Write((int)offsets[i]);

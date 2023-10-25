@@ -55,8 +55,15 @@
         </div>
     </div>
     <div class="row">
+        <div class="col d-flex gap-2 align-items-center justify-content-center">
+            <RadzenLabel Text="Name:" />
+            <RadzenTextBox Name="TextureName" @bind-Value="@_newName" MaxLength="16" />
+        </div>
+    </div>
+    <div class="row">
         <div class="col">
-            <RadzenButton Click="SaveAsync" Disabled="_newTexture is null" Text="Save" />
+            <hr/>
+            <RadzenButton Click="SaveAsync" Text="Save" />
         </div>
     </div>
 </div>
@@ -74,16 +81,27 @@
 
     private PromptDialogs? _promptDialogs;
     private IBSPTexture? _newTexture;
+    private string? _newName;
     private bool _avoidFullbrights;
 
     private ViewMode _viewMode;
 
+    protected override void OnParametersSet()
+    {
+        _newName = Texture.Name;
+    }
+
     private Task SaveAsync()
     {
-        Texture.Data = _newTexture!.Data;
-        Texture.Data2 = _newTexture.Data2;
-        Texture.Data4 = _newTexture.Data4;
-        Texture.Data8 = _newTexture.Data8;
+        if (_newTexture is not null)
+        {
+            Texture.Data = _newTexture!.Data;
+            Texture.Data2 = _newTexture.Data2;
+            Texture.Data4 = _newTexture.Data4;
+            Texture.Data8 = _newTexture.Data8;
+        }
+
+        Texture.Name = _newName ?? "";
 
         DialogService.Close(true);
 

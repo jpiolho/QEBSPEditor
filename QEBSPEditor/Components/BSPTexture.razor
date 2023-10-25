@@ -80,7 +80,7 @@ else
             // Load new image
             if (Texture != null && Palette != null)
             {
-                await Task.Run(LoadImageAsync);
+                await Task.Run(LoadImages);
 
                 _previousParameterHash = hash;
             }
@@ -92,7 +92,7 @@ else
         return HashCode.Combine(View, Texture, Palette, OnlyShowFullbright);
     }
 
-    private async Task LoadImageAsync()
+    private void LoadImages()
     {
         if (Texture is null || Palette is null)
             return;
@@ -103,11 +103,13 @@ else
                 _base64 = image.ToBase64String(PngFormat.Instance);
         }
 
+
         if (View.HasFlag(TextureView.Mipmap2))
         {
             using (var image = ConvertTextureDataToImage(Texture.Data2, Texture.Width / 2, Texture.Height / 2, Palette, OnlyShowFullbright))
                 _base64_mipmap2 = image.ToBase64String(PngFormat.Instance);
         }
+
 
         if (View.HasFlag(TextureView.Mipmap4))
         {
@@ -121,8 +123,6 @@ else
                 _base64_mipmap8 = image.ToBase64String(PngFormat.Instance);
         }
 
-        StateHasChanged();
-        await Task.Yield();
     }
 
     private Image<Rgb24> ConvertTextureDataToImage(byte[] data, int width, int height, ColorPalette palette, bool onlyFullbrights)

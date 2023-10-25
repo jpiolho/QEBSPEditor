@@ -54,7 +54,6 @@ else
     [Parameter] public string? Style { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
 
-    private bool _loading = false;
     private string? _base64, _base64_mipmap2, _base64_mipmap4, _base64_mipmap8;
     private int _previousParameterHash;
 

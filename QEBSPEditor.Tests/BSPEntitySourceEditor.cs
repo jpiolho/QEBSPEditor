@@ -402,7 +402,7 @@ namespace QEBSPEditor.Tests
         {
             // Arrange
             var mockBSP = new Mock<IBSPFileEntities>();
-            mockBSP.SetupProperty(b => b.Entities,@"{""classname""""func_wall""}{""classname""""weapon_rocketlauncher""""ammo""""1234""}{""classname""""item_shells""}");
+            mockBSP.SetupProperty(b => b.Entities, @"{""classname""""func_wall""}{""classname""""weapon_rocketlauncher""""ammo""""1234""}{""classname""""item_shells""}");
 
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
             editor.ParseEntitiesFromSource();
@@ -542,7 +542,7 @@ namespace QEBSPEditor.Tests
 
             var mockBSP = new Mock<IBSPFileEntities>();
             mockBSP.SetupProperty(b => b.Entities, source);
-            
+
             var editor = new BSPEntitySourceEditor(mockBSP.Object);
             var editor2 = new BSPEntitySourceEditor(mockBSP.Object);
 

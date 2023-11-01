@@ -2,5 +2,5 @@
 
 public interface IBSPFileTextures
 {
-    List<IBSPTexture> Textures { get; set; }
+    List<IBSPTexture?> Textures { get; set; }
 }

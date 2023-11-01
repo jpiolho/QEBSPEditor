@@ -63,11 +63,11 @@
 
     private RadzenDataGrid<IBSPTexture>? _table;
     private ColorPalette? _palette;
-    private List<IBSPTexture>? _data;
+    private List<IBSPTexture?>? _data;
 
     protected override void OnParametersSet()
     {
-        _data = BSP?.Textures;
+        _data = BSP?.Textures.Where(t => t is not null).ToList();
     }
 
     private async Task EditTextureAsync(IBSPTexture texture)

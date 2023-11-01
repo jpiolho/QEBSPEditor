@@ -119,7 +119,7 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
 
     public class MipTextures : IBSPWriteable
     {
-        public List<MipTexture> Textures { get; set; } = new();
+        public List<MipTexture?> Textures { get; set; } = new();
 
         public static MipTextures Read(BinaryReader reader)
         {
@@ -131,11 +131,14 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
             for (var i = 0; i < count; i++)
                 offsets.Add(reader.ReadInt32());
 
-            var textures = new List<MipTexture>(count);
+            var textures = new List<MipTexture?>(count);
             for (var i = 0; i < count; i++)
             {
                 if (offsets[i] == -1)
+                {
+                    textures.Add(null);
                     continue;
+                }
 
                 reader.BaseStream.Seek(offset + offsets[i], SeekOrigin.Begin);
 
@@ -160,8 +163,16 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
             List<long> offsets = new(Textures.Count);
             for (var i = 0; i < Textures.Count; i++)
             {
-                offsets.Add(writer.BaseStream.Position - offsetBase);
-                Textures[i].Write(writer);
+                var texture = Textures[i];
+                if (texture is not null)
+                {
+                    offsets.Add(writer.BaseStream.Position - offsetBase);
+                    texture.Write(writer);
+                }
+                else
+                {
+                    offsets.Add(-1);
+                }
             }
 
             // Write the offsets

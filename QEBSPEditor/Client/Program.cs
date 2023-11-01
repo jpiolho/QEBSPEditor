@@ -18,8 +18,9 @@ namespace QEBSPEditor
             builder.Services.AddSweetAlert2();
             builder.Services.AddBlazorDownloadFile();
 
-            builder.Services.AddScoped<TooltipService>();
+            builder.Services.AddScoped<AlertDialogsService>();
             builder.Services.AddScoped<DialogService>();
+            builder.Services.AddScoped<TooltipService>();
             builder.Services.AddScoped<ApplicationSettingsService>();
             builder.Services.AddScoped<ThemeService>();
 

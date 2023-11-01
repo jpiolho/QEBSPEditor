@@ -1,8 +1,8 @@
 ﻿@using QEBSPEditor.Core.Extensions;
 @using SixLabors.ImageSharp.Processing.Processors.Quantization;
 @using System.Text;
+@inject AlertDialogsService AlertDialogs
 
-<PromptDialogs @ref="_dialogs" />
 
 <FileInput FileLoad="OnFileLoadAsync">
     @if (_loadingProgress is null && Texture is not null)
@@ -44,7 +44,6 @@
     private Image<Rgb24>? _image;
 
     private int _previousArgs;
-    private PromptDialogs _dialogs = null!;
 
     public class PreviewTexture : IBSPTexture
     {
@@ -99,11 +98,11 @@
         }
         catch (UnknownImageFormatException)
         {
-            await _dialogs.FailureAsync("Failed to load image", "Unsupported image format");
+            await AlertDialogs.FailureAsync("Failed to load image", "Unsupported image format");
         }
         catch(Exception ex)
         {
-            await _dialogs.FailureAsync("Failed to load image", $"Error: {ex}");
+            await AlertDialogs.FailureAsync("Failed to load image", $"Error: {ex}");
         }
         finally
         {

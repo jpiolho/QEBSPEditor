@@ -9,10 +9,9 @@
 @inject IBlazorDownloadFileService BlazorDownloadFileService
 @inject ApplicationSettingsService ApplicationSettingsService
 @inject ThemeService ThemeService
+@inject AlertDialogsService AlertDialogs
 
 <RadzenDialog />
-
-<PromptDialogs @ref="_dialogs" />
 
 <RadzenLayout>
     <RadzenBody>
@@ -22,6 +21,7 @@
         }
     </RadzenBody>
     <RadzenSidebar>
+
         <SidebarText Title="QEBSPEditor" />
 
         @if(_bsp is not null) {
@@ -46,7 +46,6 @@
 
 @code {
     private IBSPFile? _bsp;
-    private PromptDialogs? _dialogs;
 
     protected override async Task OnInitializedAsync()
     {
@@ -70,7 +69,7 @@
             if(bsp is BSPFileGeneric)
             {
                 StateHasChanged();
-                await _dialogs!.WarningAsync("Generic BSP loaded", "This BSP version is not supported by QEBSPEditor, however it was possible to load it as a \"Generic BSP\".\nThis is a best-effort feature and there's no guarantee of things actually working. Thread carefully.");
+                await AlertDialogs.WarningAsync("Generic BSP loaded", "This BSP version is not supported by QEBSPEditor, however it was possible to load it as a \"Generic BSP\".\nThis is a best-effort feature and there's no guarantee of things actually working. Thread carefully.");
             }
 
         }

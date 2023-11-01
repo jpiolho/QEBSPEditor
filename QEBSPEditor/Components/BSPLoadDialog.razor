@@ -3,8 +3,7 @@
 @using Tewr.Blazor.FileReader
 @inject DialogService DialogService
 @inject IFileReaderService FileReaderService
-
-<PromptDialogs @ref="_dialogs" />
+@inject AlertDialogsService AlertDialogs
 
 <div>
     <FileInputBox FileLoad="LoadAsync" class="w-100">
@@ -14,8 +13,6 @@
 
 
 @code {
-    private PromptDialogs _dialogs = null!;
-
     private async Task LoadAsync(FileInput.FileLoadEventArgs args)
     {
         IBSPFile bsp;
@@ -25,12 +22,12 @@
         }
         catch (InvalidDataException ex)
         {
-            await _dialogs.FailureAsync($"Failed to load: {ex.Message}");
+            await AlertDialogs.FailureAsync($"Failed to load: {ex.Message}");
             return;
         }
         catch (Exception ex)
         {
-            await _dialogs.FailureAsync($"Failed to load: {ex}");
+            await AlertDialogs.FailureAsync($"Failed to load: {ex}");
             return;
         }
 

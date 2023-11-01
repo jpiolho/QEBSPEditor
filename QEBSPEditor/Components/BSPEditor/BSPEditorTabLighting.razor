@@ -2,7 +2,7 @@
 @using QEBSPEditor.Models;
 @using QEBSPEditor.Models.BSPFiles
 
-<PromptDialogs @ref="_dialogs" />
+@inject AlertDialogsService AlertDialogs
 
 <div class="container-fluid">
     <div class="row">
@@ -52,9 +52,6 @@
 @code {
     [Parameter] public IBSPFileLighting BSP { get; set; } = null!;
 
-
-    private PromptDialogs? _dialogs;
-
     private float _lightScale = 1f;
     private float _lightMinimum = 0f;
     private IEnumerable<float> _lightRange = null!;
@@ -91,11 +88,11 @@
                 BSP.Lightmaps[i] = (byte)Math.Clamp(BSP.Lightmaps[i], min, max);
             }
 
-            await _dialogs!.SuccessAsync($"The light range has been set between {(_lightRange.First() * 100f):0}% and {(_lightRange.Last() * 100f):0}%");
+            await AlertDialogs.SuccessAsync($"The light range has been set between {(_lightRange.First() * 100f):0}% and {(_lightRange.Last() * 100f):0}%");
         }
         catch (Exception ex)
         {
-            await _dialogs!.FailureAsync($"There was an error while setting the light range: {ex}");
+            await AlertDialogs.FailureAsync($"There was an error while setting the light range: {ex}");
         }
         finally
         {
@@ -191,11 +188,11 @@
             for (var i = 0; i < BSP.Lightmaps.Length; i++)
                 BSP.Lightmaps[i] = (byte)Math.Max(BSP.Lightmaps[i], light);
 
-            await _dialogs!.SuccessAsync($"The minimum light levels have been set to {_lightMinimum * 100:0}%");
+            await AlertDialogs.SuccessAsync($"The minimum light levels have been set to {_lightMinimum * 100:0}%");
         }
         catch (Exception ex)
         {
-            await _dialogs!.FailureAsync($"There was an error while setting the minimum light levels: {ex}");
+            await AlertDialogs.FailureAsync($"There was an error while setting the minimum light levels: {ex}");
         }
         finally
         {
@@ -218,13 +215,13 @@
                 BSP.Lightmaps[i] = b;
             }
 
-            await _dialogs!.SuccessAsync($"The lightmap has been scaled to {_lightScale * 100f:0}%");
+            await AlertDialogs.SuccessAsync($"The lightmap has been scaled to {_lightScale * 100f:0}%");
 
             _lightScale = 1f;
         }
         catch (Exception ex)
         {
-            await _dialogs!.FailureAsync($"There was an error while scaling the lightmap: {ex}");
+            await AlertDialogs.FailureAsync($"There was an error while scaling the lightmap: {ex}");
         }
         finally
         {

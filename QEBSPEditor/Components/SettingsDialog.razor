@@ -2,8 +2,7 @@
 @inject ApplicationSettingsService ApplicationSettings
 @inject DialogService DialogService
 @inject ThemeService ThemeService
-
-<PromptDialogs @ref="_dialogs" />
+@inject AlertDialogsService AlertDialogs
 
 <div>
     <SettingsSection Title="General">
@@ -47,7 +46,6 @@
 </div>
 
 @code {
-    private PromptDialogs _dialogs = null!;
     private ApplicationSettings _settings = null!;
 
     protected override void OnInitialized()
@@ -67,7 +65,7 @@
     {
         if (args.Info.Size != 256 * 3)
         {
-            await _dialogs.FailureAsync("Uploaded file is not a valid palette file (.lmp)");
+            await AlertDialogs.FailureAsync("Uploaded file is not a valid palette file (.lmp)");
             return;
         }
 

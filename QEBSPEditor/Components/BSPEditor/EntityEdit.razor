@@ -1,11 +1,11 @@
 ﻿@using QEBSPEditor.Models.BSPFiles;
 @using System.Text;
 @inject DialogService DialogService
+@inject AlertDialogsService AlertDialogs
 
 @if (Entity is null)
     return;
 
-<PromptDialogs @ref="_promptDialogs" />
 
 <div class="container-fluid">
     @foreach (var kv in _keyValues)
@@ -48,7 +48,6 @@
     [Parameter, EditorRequired] public Entity Entity { get; set; } = null!;
 
     private Dictionary<string, string> _keyValues { get; set; } = new();
-    private PromptDialogs? _promptDialogs;
 
     private string? _newKey, _newValue;
 
@@ -73,7 +72,7 @@
 
         if (_keyValues.ContainsKey(newKey))
         {
-            await _promptDialogs!.FailureAsync("Keyvalue already exists", $"The key '{newKey}' already exists");
+            await AlertDialogs.FailureAsync("Keyvalue already exists", $"The key '{newKey}' already exists");
             return;
         }
 
@@ -86,7 +85,7 @@
 
     private async Task DeleteKeyValueAsync(string key)
     {
-        if (!await _promptDialogs!.ConfirmAsync("Delete keyvalue", $"Are you sure you want to delete the key '{key}'?"))
+        if (!await AlertDialogs.ConfirmAsync("Delete keyvalue", $"Are you sure you want to delete the key '{key}'?"))
             return;
 
         _keyValues.Remove(key);

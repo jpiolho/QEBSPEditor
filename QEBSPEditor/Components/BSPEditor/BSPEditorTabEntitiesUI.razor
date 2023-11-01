@@ -3,8 +3,7 @@
 @using QEBSPEditor.Models.BSPFiles;
 @inject ILogger<BSPEditorTabEntitiesUI> Logger
 @inject DialogService DialogService
-
-<PromptDialogs @ref="_dialogs" />
+@inject AlertDialogsService AlertDialogs
 
 <RadzenButton Text="Add new entity" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Success" class="mb-4" Click="AddNewEntityAsync" />
 
@@ -57,7 +56,6 @@
     private bool _isLoading = false;
 
     private RadzenDataGrid<Entity>? _table;
-    private PromptDialogs? _dialogs;
 
     protected override async Task OnInitializedAsync()
     {
@@ -89,7 +87,7 @@
 
         _entitiesEditor.UpdateEntity(entity);
 
-        await _dialogs!.SuccessAsync("Entity saved", "The entity was saved");
+        await AlertDialogs.SuccessAsync("Entity saved", "The entity was saved");
     }
 
     private async Task AddNewEntityAsync()
@@ -99,7 +97,7 @@
         // Update the table
         _table?.Reload();
 
-        await _dialogs!.SuccessAsync("Entity added", "Added a new entity");
+        await AlertDialogs.SuccessAsync("Entity added", "Added a new entity");
     }
 
     private async Task DeleteEntityAsync(Entity entity)
@@ -108,7 +106,7 @@
         string entityDisplayName = $"'{entity.Classname}'{(targetname is not null ? $" ({targetname})" : "")}";
 
         // Confirm with the user
-        if (!await _dialogs!.ConfirmAsync("Delete entity?", $"Are you sure you want to delete {entityDisplayName}?"))
+        if (!await AlertDialogs.ConfirmAsync("Delete entity?", $"Are you sure you want to delete {entityDisplayName}?"))
             return;
 
         _entitiesEditor!.RemoveEntity(entity);
@@ -116,7 +114,7 @@
         // Update the table
         _table?.Reload();
 
-        await _dialogs!.SuccessAsync("Entity deleted", $"The entity {entityDisplayName} was deleted!");
+        await AlertDialogs.SuccessAsync("Entity deleted", $"The entity {entityDisplayName} was deleted!");
     }
 
 }

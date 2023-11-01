@@ -5,9 +5,6 @@
 @using System.Runtime.InteropServices;
 @inject DialogService DialogService
 
-
-<PromptDialogs @ref="_promptDialogs" />
-
 <div class="container-fluid">
     <div class="row">
         <div class="col d-flex justify-content-center">
@@ -79,7 +76,6 @@
     [Parameter, EditorRequired] public IBSPTexture Texture { get; set; } = null!;
     [Parameter, EditorRequired] public ColorPalette Palette { get; set; } = null!;
 
-    private PromptDialogs? _promptDialogs;
     private IBSPTexture? _newTexture;
     private string? _newName;
     private bool _avoidFullbrights;

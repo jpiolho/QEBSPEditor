@@ -1,10 +1,10 @@
 ﻿@if (Text is null)
 {
-    <RadzenText TextAlign="TextAlign.Center" TextStyle="TextStyle.Body1"><b>@Title</b></RadzenText>
+    <RadzenText TextAlign="TextAlign.Center" TextStyle="TextStyle.Body1" Style="color: var(--rz-panel-menu-color)"><b>@Title</b></RadzenText>
 }
 else
 {
-    <RadzenText class="pl-2" TextStyle="TextStyle.Body1">
+    <RadzenText class="pl-2" Style="color:var(--rz-panel-menu-color)" TextStyle="TextStyle.Body1">
         @if (Title is not null)
         {
             <b>@Title: </b>

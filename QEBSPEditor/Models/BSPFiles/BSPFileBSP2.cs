@@ -122,7 +122,7 @@ public class BSPFileBSP2 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSP
 
     public class MipTextures : IBSPWriteable
     {
-        public List<MipTexture> Textures { get; set; } = new();
+        public List<MipTexture?> Textures { get; set; } = new();
 
         public static MipTextures Read(BinaryReader reader)
         {
@@ -134,11 +134,14 @@ public class BSPFileBSP2 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSP
             for (var i = 0; i < count; i++)
                 offsets.Add(reader.ReadInt32());
 
-            var textures = new List<MipTexture>(count);
+            var textures = new List<MipTexture?>(count);
             for (var i = 0; i < count; i++)
             {
                 if (offsets[i] == -1)
+                {
+                    textures.Add(null);
                     continue;
+                }
 
                 reader.BaseStream.Seek(offset + offsets[i], SeekOrigin.Begin);
 
@@ -196,7 +199,7 @@ public class BSPFileBSP2 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSP
     public override BSPCapabilities Capabilities => BSPCapabilities.Entities | BSPCapabilities.Lighting | BSPCapabilities.Saveable | BSPCapabilities.Textures;
     public override string VersionName => "BSP2";
 
-    public List<IBSPTexture> Textures { get => MipTex.Textures.Cast<IBSPTexture>().ToList(); set => throw new NotSupportedException(); }
+    public List<IBSPTexture?> Textures { get => MipTex.Textures.Cast<IBSPTexture?>().ToList(); set => throw new NotSupportedException(); }
 
     public override IBSPFile Load(Stream stream)
     {

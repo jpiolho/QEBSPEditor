@@ -17,5 +17,6 @@ Visit [https://jpiolho.github.io/QEBSPEditor/](https://jpiolho.github.io/QEBSPEd
 
 ## Roadmap
 - Improve theme compatibility
+- Support for BSPX
 - Help menu
 - Mobile UI (gotta edit those BSPs on the go)

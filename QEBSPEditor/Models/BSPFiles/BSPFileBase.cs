@@ -8,6 +8,8 @@ public abstract class BSPFileBase : IBSPFile
     public abstract BSPCapabilities Capabilities { get; }
     public abstract IBSPFile Load(Stream stream);
 
+    public byte[] ExtraBytes { get; set; } = Array.Empty<byte>();
+
     protected interface IBSPWriteable
     {
         void Write(BinaryWriter writer);
@@ -19,6 +21,9 @@ public abstract class BSPFileBase : IBSPFile
 
         public int Offset { get; set; }
         public int Size { get; set; }
+
+
+        public int EndOffset => Offset + Size;
     }
 
     protected static ChunkHeader ReadChunkHeader(BinaryReader reader)

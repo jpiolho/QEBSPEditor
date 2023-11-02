@@ -238,6 +238,28 @@ public class BSPFileBSP2 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSP
         this.LEdges = ReadGenericChunk(headerLEdges, reader);
         this.Models = ReadGenericChunk(headerModels, reader);
 
+        // Read any extra bytes, as it can contain BSPX or other data
+        stream.Seek(MathUtils.Max(
+            headerEntities.EndOffset,
+            headerPlanes.EndOffset,
+            headerMiptex.EndOffset,
+            headerVertices.EndOffset,
+            headerVisilist.EndOffset,
+            headerNodes.EndOffset,
+            headerTexInfo.EndOffset,
+            headerFaces.EndOffset,
+            headerLightmaps.EndOffset,
+            headerClipnodes.EndOffset,
+            headerLeaves.EndOffset,
+            headerLFace.EndOffset,
+            headerEdges.EndOffset,
+            headerLEdges.EndOffset,
+            headerModels.EndOffset
+        ), SeekOrigin.Begin);
+        var extraBytesSize = (int)(stream.Length - stream.Position);
+        if (extraBytesSize > 0)
+            ExtraBytes = reader.ReadBytes(extraBytesSize);
+
         return this;
     }
 
@@ -264,6 +286,10 @@ public class BSPFileBSP2 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSP
         WriteChunkAndHeader(writer, 12, Edges);
         WriteChunkAndHeader(writer, 13, LEdges);
         WriteChunkAndHeader(writer, 14, Models);
+
+        // Write extra bytes
+        stream.Seek(0, SeekOrigin.End);
+        stream.Write(ExtraBytes);
     }
 
     private static MipTextures ReadMipTexChunk(ChunkHeader header, BinaryReader reader)

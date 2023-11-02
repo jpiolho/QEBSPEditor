@@ -23,7 +23,7 @@
     <Columns>
         <RadzenDataGridColumn TItem="IBSPTexture" Visible="false" Title="#" Sortable="false" Filterable="false">
             <Template>
-                @(_data!.IndexOf(context))
+                @(BSP.Textures!.IndexOf(context))
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TItem="IBSPTexture" Title="Name" Property="@nameof(IBSPTexture.Name)" />

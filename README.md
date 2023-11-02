@@ -14,9 +14,9 @@ Visit [https://jpiolho.github.io/QEBSPEditor/](https://jpiolho.github.io/QEBSPEd
 - **Adjust global light**: Experimental global lighting adjustment feature.
 - **Supported BSP versions**: Supports BSP versions 29, BSP2 and 2PSB.
 - **Generic BSP support**: You can also load unsupported BSP files from other games using a best-effort BSP loader which will allow you to edit the entities.
+- **Any extra bytes are safe**: All data appended after the BSP, such as BSPX lumps, is preserved.
 
 ## Roadmap
 - Improve theme compatibility
-- Support for BSPX
 - Help menu
 - Mobile UI (gotta edit those BSPs on the go)

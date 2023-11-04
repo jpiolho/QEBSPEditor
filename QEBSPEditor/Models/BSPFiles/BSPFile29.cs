@@ -4,7 +4,7 @@ using System.Text;
 
 namespace QEBSPEditor.Models.BSPFiles;
 
-public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFileTextures, IBSPSave
+public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFileTextures, IBSPSave, IBSPFileBSPX
 {
     public class Face : IBSPWriteable
     {
@@ -201,10 +201,17 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
     public byte[] Models { get; set; } = Array.Empty<byte>();
 
 
-    public override BSPCapabilities Capabilities => BSPCapabilities.Entities | BSPCapabilities.Lighting | BSPCapabilities.Saveable | BSPCapabilities.Textures;
+    public override BSPCapabilities Capabilities => 
+        BSPCapabilities.Entities | 
+        BSPCapabilities.Lighting | 
+        BSPCapabilities.Saveable | 
+        BSPCapabilities.Textures | 
+        BSPCapabilities.BSPX;
+
     public override string VersionName => "29";
 
-    public List<IBSPTexture> Textures { get => MipTex.Textures.Cast<IBSPTexture>().ToList(); set => throw new NotSupportedException(); }
+    public List<IBSPTexture?> Textures { get => MipTex.Textures.Cast<IBSPTexture?>().ToList(); set => throw new NotSupportedException(); }
+    public BSPX? BspX { get; set; }
 
     public void Save(Stream stream)
     {
@@ -229,6 +236,13 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
         WriteChunkAndHeader(writer, 12, Edges);
         WriteChunkAndHeader(writer, 13, LEdges);
         WriteChunkAndHeader(writer, 14, Models);
+
+        // Write BSPX
+        if(BspX is not null)
+        {
+            stream.Seek(0, SeekOrigin.End);
+            BspX.Save(stream);
+        }
 
         // Write extra bytes
         stream.Seek(0, SeekOrigin.End);
@@ -275,7 +289,7 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
         this.LEdges = ReadGenericChunk(headerLEdges, reader);
         this.Models = ReadGenericChunk(headerModels, reader);
 
-        // Read any extra bytes, as it can contain BSPX or other data
+        // Lets try to read BSPX now
         stream.Seek(MathUtils.Max(
             headerEntities.EndOffset,
             headerPlanes.EndOffset,
@@ -293,6 +307,17 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
             headerLEdges.EndOffset,
             headerModels.EndOffset
         ), SeekOrigin.Begin);
+
+        if (BSPX.TryLoadBSPXLump(stream, out var bspx))
+        {
+            BspX = bspx;
+
+            // Skip all the lumps
+            if(bspx.Lumps.Count > 0)
+                stream.Seek(bspx.Lumps.Max(l => l.Offset!.Value + l.Size!.Value), SeekOrigin.Begin);
+        }
+
+        // Read any extra bytes
         var extraBytesSize = (int)(stream.Length - stream.Position);
         if (extraBytesSize > 0)
             ExtraBytes = reader.ReadBytes(extraBytesSize);

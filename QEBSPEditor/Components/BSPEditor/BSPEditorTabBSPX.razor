@@ -1,0 +1,86 @@
+﻿@using Blazor.DownloadFileFast.Interfaces;
+@using QEBSPEditor.Models.BSPFiles;
+@inject IBlazorDownloadFileService BlazorDownloadFileService
+@inject AlertDialogsService AlertDialogs
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <EditorCard Title="Embedded .lit LDR file" Info="This manages the 'RGBLIGHTING' lump, which allows you to embed .lit (LDR) files into the bsp directly">
+                <div class="d-flex gap-2">
+                    <RadzenButton Disabled="!HasLump(LumpRGBLIGHTING)" Text="Extract" Click="@DownloadLitAsync" />
+                    <FileInputButton FileLoad="@EmbedLitFile">Embed</FileInputButton>
+                    <RadzenButton Text="Delete" Disabled="!HasLump(LumpRGBLIGHTING)" ButtonStyle="ButtonStyle.Danger" Click="@DeleteLitAsync" />
+                </div>
+            </EditorCard>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private const string LumpRGBLIGHTING = "RGBLIGHTING";
+
+    [Parameter] public IBSPFileBSPX BSP { get; set; } = default!;
+
+    private async Task DownloadLitAsync()
+    {
+        var lump = GetLump(LumpRGBLIGHTING) ?? throw new InvalidOperationException($"Could not find {LumpRGBLIGHTING} lump");
+
+        using (var ms = new MemoryStream())
+        {
+            new LitFile()
+                {
+                    Data = lump.Data
+                }.Save(ms);
+
+            await BlazorDownloadFileService.DownloadFileAsync($"{((IBSPFile)BSP).Name}.lit", ms.ToArray());
+        }
+    }
+
+    private async void EmbedLitFile(FileInput.FileLoadEventArgs args)
+    {
+        var lit = new LitFile();
+
+        try
+        {
+            lit.Load(args.Stream);
+        }
+        catch (Exception ex)
+        {
+            await AlertDialogs.FailureAsync("Failed to load .lit file", $"Could not load lit file: {ex.Message}");
+            return;
+        }
+
+        if (BSP.BspX is null)
+            BSP.BspX = new BSPX();
+
+        BSP.BspX.AddOrReplaceLump(new BSPXLump()
+            {
+                Name = "RGBLIGHTING",
+                Data = lit.Data
+            });
+
+        StateHasChanged();
+        await AlertDialogs.SuccessAsync("Success", "The lit file has been embedded");
+    }
+
+    private async Task DeleteLitAsync()
+    {
+        if (!await AlertDialogs.ConfirmAsync("Delete embedded lit file?", "Are you sure?"))
+            return;
+
+        BSP.BspX!.Lumps.Remove(GetLump(LumpRGBLIGHTING)!);
+    }
+
+    public bool HasLump(string name)
+    {
+        return GetLump(name) is not null;
+    }
+
+
+    private BSPXLump? GetLump(string name)
+    {
+        return BSP.BspX?.GetLump(name);
+    }
+}

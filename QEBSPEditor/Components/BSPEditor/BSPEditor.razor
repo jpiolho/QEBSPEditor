@@ -16,12 +16,13 @@
                 <BSPEditorTabTextures BSP="(BSP as IBSPFileTextures)" />
             </RadzenTabsItem>
 
-            @if (ApplicationSettingsService.Settings.ExperimentalMode)
-            {
-                <RadzenTabsItem Text="Lighting" Disabled="!BSP.Capabilities.HasFlag(BSPCapabilities.Lighting)">
-                    <BSPEditorTabLighting BSP="BSP as IBSPFileLighting" />
-                </RadzenTabsItem>
-            }
+            <RadzenTabsItem Text="Lighting" Disabled="!BSP.Capabilities.HasFlag(BSPCapabilities.Lighting)">
+                <BSPEditorTabLighting BSP="BSP as IBSPFileLighting" />
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="BSPX" Disabled="!BSP.Capabilities.HasFlag(BSPCapabilities.BSPX)">
+                <BSPEditorTabBSPX BSP="BSP as IBSPFileBSPX" />
+            </RadzenTabsItem>
         </Tabs>
     </RadzenTabs>
 </CascadingValue>

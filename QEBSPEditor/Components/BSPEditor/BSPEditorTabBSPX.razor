@@ -52,10 +52,10 @@
             return;
         }
 
-        if (BSP.BspX is null)
-            BSP.BspX = new BSPX();
+        if (BSP.BSPXChunk is null)
+            BSP.BSPXChunk = new BSPX();
 
-        BSP.BspX.AddOrReplaceLump(new BSPXLump()
+        BSP.BSPXChunk.AddOrReplaceLump(new BSPXLump()
             {
                 Name = "RGBLIGHTING",
                 Data = lit.Data
@@ -70,7 +70,7 @@
         if (!await AlertDialogs.ConfirmAsync("Delete embedded lit file?", "Are you sure?"))
             return;
 
-        BSP.BspX!.Lumps.Remove(GetLump(LumpRGBLIGHTING)!);
+        BSP.BSPXChunk!.Lumps.Remove(GetLump(LumpRGBLIGHTING)!);
     }
 
     public bool HasLump(string name)
@@ -81,6 +81,6 @@
 
     private BSPXLump? GetLump(string name)
     {
-        return BSP.BspX?.GetLump(name);
+        return BSP.BSPXChunk?.GetLump(name);
     }
 }

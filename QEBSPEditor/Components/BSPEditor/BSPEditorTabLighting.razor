@@ -12,25 +12,17 @@
     </div>
     <div class="row">
         <div class="col">
-            <RadzenCard>
-                <div class="d-flex align-items-center">
-                    Scale lighting
-                    <InfoBubble Text="Scale all the lightmaps in the map by a percentage" />
-                </div>
+            <EditorCard Title="Scale lighting" Info="Scale all the lightmaps in the map by a percentage">
                 <RadzenSlider TValue="float" Step="0.01" Min="0" Max="2" @bind-Value="_lightScale" Class="w-100" />
                 <RadzenButton IsBusy="_busy" class="mt-2" Text="@($"Scale ({_lightScale * 100f:0}%)")" Click="@(() => Task.Run(ScaleLighting))" />
-            </RadzenCard>
+            </EditorCard>
         </div>
 
         <div class="col">
-            <RadzenCard>
-                <div class="d-flex align-items-center">
-                    Minimum light level
-                    <InfoBubble Text="Sets the minimum light levels for the whole map" />
-                </div>
+            <EditorCard Title="Minimum light level" Info="Sets the minimum light levels for the whole map">
                 <RadzenSlider TValue="float" Step="0.01" Min="0" Max="1" @bind-Value="_lightMinimum" Class="w-100" />
                 <RadzenButton IsBusy="_busy" class="mt-2" Text="@($"Scale ({_lightMinimum * 100f:0}%)")" Click="@(() => Task.Run(SetMinimumLightAsync))" />
-            </RadzenCard>
+            </EditorCard>
         </div>
 
 

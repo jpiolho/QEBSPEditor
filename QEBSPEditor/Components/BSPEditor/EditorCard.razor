@@ -1,0 +1,18 @@
+﻿<RadzenCard>
+    <div class="d-flex align-items-center">
+        @Title
+
+        @if (!string.IsNullOrEmpty(Info))
+        {
+            <InfoBubble Text="@Info" />
+        }
+    </div>
+
+    @ChildContent
+</RadzenCard>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Info { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

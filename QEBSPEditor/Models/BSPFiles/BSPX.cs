@@ -9,6 +9,9 @@ namespace QEBSPEditor.Models.BSPFiles;
 /// </summary>
 public class BSPX
 {
+    /// <summary>
+    /// Gets or sets the lumps contained within the BSPX.
+    /// </summary>
     public List<BSPXLump> Lumps { get; set; } = new();
 
     /// <summary>
@@ -119,7 +122,7 @@ public class BSPX
     }
 
     /// <summary>
-    /// Saves the BSPX file to the provided stream.
+    /// Saves the BSPX data to the provided stream.
     /// </summary>
     /// <param name="stream">The stream to which the BSPX data will be saved.</param>
     public void Save(Stream stream)

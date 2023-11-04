@@ -211,7 +211,7 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
     public override string VersionName => "29";
 
     public List<IBSPTexture?> Textures { get => MipTex.Textures.Cast<IBSPTexture?>().ToList(); set => throw new NotSupportedException(); }
-    public BSPX? BspX { get; set; }
+    public BSPX? BSPXChunk { get; set; }
 
     public void Save(Stream stream)
     {
@@ -238,10 +238,10 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
         WriteChunkAndHeader(writer, 14, Models);
 
         // Write BSPX
-        if(BspX is not null)
+        if(BSPXChunk is not null)
         {
             stream.Seek(0, SeekOrigin.End);
-            BspX.Save(stream);
+            BSPXChunk.Save(stream);
         }
 
         // Write extra bytes
@@ -310,7 +310,7 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
 
         if (BSPX.TryLoad(stream, out var bspx))
         {
-            BspX = bspx;
+            BSPXChunk = bspx;
 
             // Skip all the lumps
             if(bspx.Lumps.Count > 0)

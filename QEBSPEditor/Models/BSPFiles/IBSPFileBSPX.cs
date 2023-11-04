@@ -2,5 +2,5 @@
 
 public interface IBSPFileBSPX
 {
-    BSPX? BspX { get; set; }
+    BSPX? BSPXChunk { get; set; }
 }

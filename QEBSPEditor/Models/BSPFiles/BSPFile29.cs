@@ -308,13 +308,13 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
             headerModels.EndOffset
         ), SeekOrigin.Begin);
 
-        if (BSPX.TryLoadBSPXLump(stream, out var bspx))
+        if (BSPX.TryLoad(stream, out var bspx))
         {
             BspX = bspx;
 
             // Skip all the lumps
             if(bspx.Lumps.Count > 0)
-                stream.Seek(bspx.Lumps.Max(l => l.Offset!.Value + l.Size!.Value), SeekOrigin.Begin);
+                stream.Seek(bspx.Lumps.Max(l => l.EntryOffset!.Value + l.EntrySize!.Value), SeekOrigin.Begin);
         }
 
         // Read any extra bytes

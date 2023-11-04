@@ -166,8 +166,16 @@ public class BSPFileBSP2 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSP
             List<long> offsets = new(Textures.Count);
             for (var i = 0; i < Textures.Count; i++)
             {
-                offsets.Add(writer.BaseStream.Position - offsetBase);
-                Textures[i].Write(writer);
+                var texture = Textures[i];
+                if (texture is not null)
+                {
+                    offsets.Add(writer.BaseStream.Position - offsetBase);
+                    texture.Write(writer);
+                }
+                else
+                {
+                    offsets.Add(-1);
+                }
             }
 
             // Write the offsets

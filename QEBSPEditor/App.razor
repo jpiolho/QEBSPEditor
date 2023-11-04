@@ -86,7 +86,7 @@
         {
             bsp.Save(ms);
             ms.Flush();
-            await BlazorDownloadFileService.DownloadFileAsync("map.bsp", ms.ToArray());
+            await BlazorDownloadFileService.DownloadFileAsync($"{_bsp.Name}.bsp", ms.ToArray());
         }
     }
 

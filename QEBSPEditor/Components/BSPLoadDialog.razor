@@ -6,7 +6,7 @@
 @inject AlertDialogsService AlertDialogs
 
 <div>
-    <FileInputBox FileLoad="LoadAsync" class="w-100">
+    <FileInputBox FileLoad="LoadAsync" Class="w-100">
         Click or drag a BSP file to load it
     </FileInputBox>
 </div>
@@ -31,8 +31,18 @@
             return;
         }
 
-        bsp.Name = args.Info.Name;
+        bsp.Name = GetBSPName(args.Info.Name);
         DialogService.Close(bsp);
+    }
+
+    private string GetBSPName(string filename)
+    {
+        const string BSPExtension = ".bsp";
+
+        if (filename.EndsWith(BSPExtension))
+            return filename.Substring(0, filename.Length - BSPExtension.Length);
+
+        return filename;
     }
 
     public static async Task<IBSPFile> OpenAsync(DialogService dialogService)

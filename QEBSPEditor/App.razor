@@ -12,6 +12,7 @@
 @inject AlertDialogsService AlertDialogs
 
 <RadzenDialog />
+<ApplicationSettingsWatcher SettingsChange="OnSettingsChangedAsync" />
 
 <RadzenLayout>
     <RadzenBody>
@@ -49,11 +50,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ApplicationSettingsService.Changed += OnSettingsChangedAsync;
         await ApplicationSettingsService.LoadAsync();
     }
 
-    private async void OnSettingsChangedAsync(object? sender, ApplicationSettings settings)
+    private async void OnSettingsChangedAsync(ApplicationSettings settings)
     {
         await ThemeService.ChangeThemeAsync(settings.Theme);
         StateHasChanged();
@@ -85,7 +85,7 @@
         using (var ms = new MemoryStream())
         {
             bsp.Save(ms);
-            ms.Flush();
+
             await BlazorDownloadFileService.DownloadFileAsync($"{_bsp.Name}.bsp", ms.ToArray());
         }
     }

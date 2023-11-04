@@ -1,0 +1,8 @@
+﻿<RadzenPanelMenuItemClickable Text="@Text" Icon="@Icon" Click="@Click" Visible="@Visible" />
+
+@code {
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public bool Visible { get; set; } = true;
+    [Parameter] public EventCallback Click { get; set; }
+}

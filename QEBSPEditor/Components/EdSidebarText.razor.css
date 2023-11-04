@@ -1,0 +1,7 @@
+﻿.ed-sidebar-text {
+    display: flex;
+}
+
+.ed-sidebar-text, ::deep .ed-sidebar-text-color {
+    color: var(--rz-panel-menu-color) !important;
+}

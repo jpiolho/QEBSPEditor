@@ -3,9 +3,7 @@
 @using QEBSPEditor.Core
 @using QEBSPEditor.Models
 @using QEBSPEditor.Models.BSPFiles
-@using Tewr.Blazor.FileReader
 @inject DialogService DialogService
-@inject IFileReaderService FileReaderService
 @inject IBlazorDownloadFileService BlazorDownloadFileService
 @inject ApplicationSettingsService ApplicationSettingsService
 @inject ThemeService ThemeService
@@ -14,36 +12,33 @@
 <RadzenDialog />
 <ApplicationSettingsWatcher SettingsChange="OnSettingsChangedAsync" />
 
-<RadzenLayout>
-    <RadzenBody>
+<EdMainLayout>
+    <Body>
         @if (_bsp is not null)
         {
             <BSPEditor BSP="_bsp" />
         }
-    </RadzenBody>
-    <RadzenSidebar>
+    </Body>
 
-        <SidebarText Title="QEBSPEditor" />
+    <Sidebar>
+        <EdSidebarTitle Title="QEBSPEditor" />
 
-        @if(_bsp is not null) {
-            <SidebarText Title="Name" Text="@_bsp.Name" />
-
-            <div class="d-flex">
-                <SidebarText Title="Type" Text="@_bsp.VersionName" />
-                <RadzenIcon class="pl-2" style="cursor: pointer" Icon="info" IconStyle="IconStyle.Info" @onclick="() => CapabilitiesDialog.OpenAsync(DialogService, _bsp)" />
-            </div>
+        @if (_bsp is not null)
+        {
+            <EdSidebarText Title="Name" Text="@_bsp.Name" />
+            <EdSidebarText Title="Type" Text="@_bsp.VersionName">
+                <RadzenIcon class="pl-2" style="cursor: pointer" Icon="help" IconStyle="IconStyle.Info" @onclick="() => CapabilitiesDialog.OpenAsync(DialogService, _bsp)" />
+            </EdSidebarText>
         }
 
-        <RadzenPanelMenu>
-            <RadzenPanelMenuItemClickable Text="Load..." Icon="file_upload" Click="OpenLoadDialogAsync" />
-            <RadzenPanelMenuItemClickable Text="Save" Icon="file_download" Visible="@(_bsp is not null && _bsp.Capabilities.HasFlag(BSPCapabilities.Saveable))" Click="SaveAsync" />
-            <RadzenPanelMenuItemClickable Text="Settings" Icon="settings" Click="() => SettingsDialog.OpenAsync(DialogService)" />
-            <RadzenPanelMenuItemClickable Text="About" Icon="contact_support" Click="() => AboutDialog.OpenAsync(DialogService)" />
-        </RadzenPanelMenu>
-    </RadzenSidebar>
-</RadzenLayout>
-
-
+        <EdSidebarMenu>
+            <EdSidebarItem Text="Load..." Icon="file_upload" Click="OpenLoadDialogAsync" />
+            <EdSidebarItem Text="Save" Icon="file_download" Click="SaveAsync" Visible="@(_bsp?.Capabilities.HasFlag(BSPCapabilities.Saveable) ?? false)" />
+            <EdSidebarItem Text="Settings" Icon="settings" Click="() => SettingsDialog.OpenAsync(DialogService)" />
+            <EdSidebarItem Text="About" Icon="contact_support" Click="() => AboutDialog.OpenAsync(DialogService)" />
+        </EdSidebarMenu>
+    </Sidebar>
+</EdMainLayout>
 
 @code {
     private IBSPFile? _bsp;
@@ -63,10 +58,11 @@
     {
         var bsp = await BSPLoadDialog.OpenAsync(DialogService);
 
-        if (bsp is not null) {
+        if (bsp is not null)
+        {
             _bsp = bsp;
 
-            if(bsp is BSPFileGeneric)
+            if (bsp is BSPFileGeneric)
             {
                 StateHasChanged();
                 await AlertDialogs.WarningAsync("Generic BSP loaded", "This BSP version is not supported by QEBSPEditor, however it was possible to load it as a \"Generic BSP\".\nThis is a best-effort feature and there's no guarantee of things actually working. Thread carefully.");

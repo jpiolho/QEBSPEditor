@@ -1,0 +1,13 @@
+﻿<RadzenLayout>
+    <RadzenBody>
+        @Body
+    </RadzenBody>
+    <RadzenSidebar>
+        @Sidebar
+    </RadzenSidebar>
+</RadzenLayout>
+
+@code {
+    [Parameter] public RenderFragment? Body { get; set; }
+    [Parameter] public RenderFragment? Sidebar { get; set; }
+}

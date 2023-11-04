@@ -1,0 +1,18 @@
+﻿<div class="pl-2 ed-sidebar-text">
+    <RadzenText class="ed-sidebar-text-color" TextStyle="TextStyle.Body1">
+        @if (Title is not null)
+        {
+            <b>@Title: </b>
+        }
+
+        @Text
+    </RadzenText>
+
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

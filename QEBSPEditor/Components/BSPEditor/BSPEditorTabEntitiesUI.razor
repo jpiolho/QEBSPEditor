@@ -92,10 +92,13 @@
 
     private async Task AddNewEntityAsync()
     {
-        _entitiesEditor.AddEntity("<new entity>");
+        var entity = _entitiesEditor.AddEntity("<new entity>");
 
         // Update the table
-        _table?.Reload();
+        if(_table!.CurrentPage == _table.PageNumbersCount-1)
+            await _table!.InsertRow(entity);
+        else
+            await _table!.LastPage();
 
         await AlertDialogs.SuccessAsync("Entity added", "Added a new entity");
     }

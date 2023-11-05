@@ -201,11 +201,11 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
     public byte[] Models { get; set; } = Array.Empty<byte>();
 
 
-    public override BSPCapabilities Capabilities => 
-        BSPCapabilities.Entities | 
-        BSPCapabilities.Lighting | 
-        BSPCapabilities.Saveable | 
-        BSPCapabilities.Textures | 
+    public override BSPCapabilities Capabilities =>
+        BSPCapabilities.Entities |
+        BSPCapabilities.Lighting |
+        BSPCapabilities.Saveable |
+        BSPCapabilities.Textures |
         BSPCapabilities.BSPX;
 
     public override string VersionName => "29";
@@ -238,7 +238,7 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
         WriteChunkAndHeader(writer, 14, Models);
 
         // Write BSPX
-        if(BSPXChunk is not null)
+        if (BSPXChunk is not null)
         {
             stream.Seek(0, SeekOrigin.End);
             BSPXChunk.Save(stream);
@@ -313,7 +313,7 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
             BSPXChunk = bspx;
 
             // Skip all the lumps
-            if(bspx.Lumps.Count > 0)
+            if (bspx.Lumps.Count > 0)
                 stream.Seek(bspx.Lumps.Max(l => l.EntryOffset!.Value + l.EntrySize!.Value), SeekOrigin.Begin);
         }
 

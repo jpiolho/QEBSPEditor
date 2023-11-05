@@ -7,6 +7,7 @@
 
 
 @code {
+    private const int BufferSize = 1024 * 256; // 256kb
     public class FileLoadEventArgs
     {
         public required IFileInfo Info { get; init; }
@@ -29,7 +30,7 @@
 
         var info = await file.ReadFileInfoAsync();
 
-        using (var memoryStream = await file.CreateMemoryStreamAsync(4096))
+        using (var memoryStream = await file.CreateMemoryStreamAsync(BufferSize))
         {
             await FileLoad.InvokeAsync(new()
                 {

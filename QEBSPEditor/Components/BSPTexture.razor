@@ -1,5 +1,7 @@
-﻿@using SixLabors.ImageSharp.Formats.Png;
+﻿@using QEBSPEditor.Core.Utilities;
+@using SixLabors.ImageSharp.Formats.Bmp;
 @using System.Text;
+@using System.Diagnostics;
 
 @if (AnyImage)
 {
@@ -99,49 +101,52 @@ else
         if (View.HasFlag(TextureView.Full))
         {
             using (var image = ConvertTextureDataToImage(Texture.Data, Texture.Width, Texture.Height, Palette, OnlyShowFullbright))
-                _base64 = image.ToBase64String(PngFormat.Instance);
+                _base64 = image.ToBase64String(BmpFormat.Instance);
         }
-
 
         if (View.HasFlag(TextureView.Mipmap2))
         {
             using (var image = ConvertTextureDataToImage(Texture.Data2, Texture.Width / 2, Texture.Height / 2, Palette, OnlyShowFullbright))
-                _base64_mipmap2 = image.ToBase64String(PngFormat.Instance);
+                _base64_mipmap2 = image.ToBase64String(BmpFormat.Instance);
         }
-
 
         if (View.HasFlag(TextureView.Mipmap4))
         {
             using (var image = ConvertTextureDataToImage(Texture.Data4, Texture.Width / 4, Texture.Height / 4, Palette, OnlyShowFullbright))
-                _base64_mipmap4 = image.ToBase64String(PngFormat.Instance);
+                _base64_mipmap4 = image.ToBase64String(BmpFormat.Instance);
         }
 
         if (View.HasFlag(TextureView.Mipmap8))
         {
             using (var image = ConvertTextureDataToImage(Texture.Data8, Texture.Width / 8, Texture.Height / 8, Palette, OnlyShowFullbright))
-                _base64_mipmap8 = image.ToBase64String(PngFormat.Instance);
+                _base64_mipmap8 = image.ToBase64String(BmpFormat.Instance);
         }
-
     }
 
     private Image<Rgb24> ConvertTextureDataToImage(byte[] data, int width, int height, ColorPalette palette, bool onlyFullbrights)
     {
-        Rgb24[] colorData;
+        Span<Rgb24> colorData = stackalloc Rgb24[data.Length];
 
         if (!onlyFullbrights)
         {
-            colorData = data
-                .Select(index => palette.GetColor(index).ToPixel<Rgb24>())
-                .ToArray();
+            for(var i=0;i<data.Length;i++)
+                colorData[i] = palette.GetColor(data[i]).ToPixel<Rgb24>();
         }
         else
         {
             // Filter by fullbrights
-            colorData = data
-                .Select(index =>
-                    (index >= palette.FullBrightStart && index <= palette.FullBrightEnd ? palette.GetColor(index) : Color.Black).ToPixel<Rgb24>()
-                )
-                .ToArray();
+            for(var i = 0; i < data.Length; i++)
+            {
+                var index = data[i];
+                Color color;
+
+                if (index >= palette.FullBrightStart && index <= palette.FullBrightEnd)
+                    color = palette.GetColor(index);
+                else
+                    color = Color.Black;
+
+                colorData[i] = color.ToPixel<Rgb24>();
+            }
         }
 
         return Image.LoadPixelData<Rgb24>(colorData, width, height);

@@ -2,8 +2,6 @@
 using QEBSPEditor.Core.Exceptions;
 using QEBSPEditor.Models;
 using QEBSPEditor.Models.BSPFiles;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace QEBSPEditor.Services;
 
@@ -84,7 +82,7 @@ public class BSPService
     }
 
 
-    public Image<Rgb24> TextureToImage(IBSPTexture texture, ColorPalette palette, bool onlyFullbrights, Func<IBSPTexture, (byte[] data,int width,int height)> dataSelector)
+    public Image<Rgb24> TextureToImage(IBSPTexture texture, ColorPalette palette, bool onlyFullbrights, Func<IBSPTexture, (byte[] data, int width, int height)> dataSelector)
     {
         var (data, width, height) = dataSelector(texture);
 
@@ -120,7 +118,7 @@ public class BSPService
     {
         if (bsp is not TCapability bspAsCapability)
             throw new BSPNotCompatibleException();
-        
+
         return bspAsCapability;
     }
 }

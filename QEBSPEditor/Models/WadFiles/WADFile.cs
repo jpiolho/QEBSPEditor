@@ -24,14 +24,14 @@ public class WADFile
     public async Task SaveAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         using var ms = new MemoryStream();
-        using var writer = new BinaryWriter(ms, Encoding.Default,true);
+        using var writer = new BinaryWriter(ms, Encoding.Default, true);
 
 
         writer.Write("WAD2".AsSpan());
         writer.Write((uint)Entries.Count);
         writer.Write((uint)writer.BaseStream.Position + sizeof(uint)); // We'll start writing the directory right after this
-        
-        for(var i=0;i<Entries.Count;i++)
+
+        for (var i = 0; i < Entries.Count; i++)
         {
             writer.Write((uint)0); // Offset
             writer.Write((uint)0); // Wad Size
@@ -42,7 +42,7 @@ public class WADFile
             writer.WriteFixedSizeString(Entries[i].Name, 16);
         }
 
-        for(var i=0;i<Entries.Count;i++)
+        for (var i = 0; i < Entries.Count; i++)
         {
             var entry = Entries[i];
 

@@ -68,12 +68,12 @@
         {
             new("Bitmap (.bmp)", () => ImageZipExporterAsync(BmpFormat.Instance,"bmp")),
             new("Png (.png)", () => ImageZipExporterAsync(PngFormat.Instance,"png")),
-            new("Wad (.wad)", ImageWadExporterAsync),
+            new("Wad2 Quake (.wad)", ImageWadExporterAsync),
             new("TGA (.tga)", () => ImageZipExporterAsync(TgaFormat.Instance,"tga")),
-            new ("TIFF (.tiff)", () => ImageZipExporterAsync(TiffFormat.Instance,"tiff")),
-            new ("Gif (.gif)", () => ImageZipExporterAsync(GifFormat.Instance,"gif")),
+            new("TIFF (.tiff)", () => ImageZipExporterAsync(TiffFormat.Instance,"tiff")),
+            new("Gif (.gif)", () => ImageZipExporterAsync(GifFormat.Instance,"gif")),
             new("Jpeg (.jpg)", () => ImageZipExporterAsync(JpegFormat.Instance,"jpg")),
-            new ("WebP (.webp)", () => ImageZipExporterAsync(WebpFormat.Instance,"webp"))
+            new("WebP (.webp)", () => ImageZipExporterAsync(WebpFormat.Instance,"webp"))
         };
     }
 

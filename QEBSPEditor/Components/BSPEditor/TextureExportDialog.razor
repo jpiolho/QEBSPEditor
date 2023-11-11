@@ -1,4 +1,5 @@
 ﻿@using Blazor.DownloadFileFast.Interfaces;
+@using QEBSPEditor.Models.WadFiles;
 @using SixLabors.ImageSharp.Formats;
 @using SixLabors.ImageSharp.Formats.Bmp;
 @using SixLabors.ImageSharp.Formats.Gif;
@@ -25,17 +26,17 @@
             Format:
         </div>
         <div class="col-sm-auto text-center">
-            <RadzenDropDown Data="@ImageFormats"
+            <RadzenDropDown Data="@_imageFormats"
                             TValue="@(ImageFormat)"
                             AllowClear="false"
-                            @bind-Value="@_format"
+            @bind-Value="@_format"
                             TextProperty="@(nameof(ImageFormat.Name))"
                             class="w-100" />
         </div>
     </div>
     <div class="row">
         <div class="col">
-            <hr/>
+            <hr />
         </div>
     </div>
     <div class="row justify-content-end">
@@ -46,7 +47,8 @@
 </div>
 
 @code {
-    private record ImageFormat(string Name, string Extension, IImageFormat Format) { }
+    private delegate Task<(string, byte[])> ImageExporterDelegate();
+    private record ImageFormat(string Name, ImageExporterDelegate Exporter) { }
 
     [Parameter] public IBSPFileTextures BSP { get; set; } = default!;
     [Parameter] public ColorPalette Palette { get; set; } = default!;
@@ -55,19 +57,25 @@
     private ImageFormat? _format;
     private bool _exporting;
 
-    [MemberNotNullWhen(false,nameof(_format))]
+    [MemberNotNullWhen(false, nameof(_format))]
     private bool IsExportButtonDisabled => _format is null || _exporting;
 
-    private static IEnumerable<ImageFormat> ImageFormats = new ImageFormat[]
+    private IEnumerable<ImageFormat> _imageFormats = default!;
+
+    protected override void OnInitialized()
     {
-        new("Bitmap (.bmp)", "bmp", BmpFormat.Instance),
-        new("Png (.png)","png", PngFormat.Instance),
-        new("TGA (.tga)","tga", TgaFormat.Instance),
-        new ("Gif (.gif)","gif", GifFormat.Instance),
-        new ("TIFF (.tiff)","tiff", TiffFormat.Instance),
-        new("Jpeg (.jpg)", "jpg", JpegFormat.Instance),
-        new ("WebP (.webp)","webp", WebpFormat.Instance)
-    };
+        _imageFormats = new ImageFormat[]
+        {
+            new("Bitmap (.bmp)", () => ImageZipExporterAsync(BmpFormat.Instance,"bmp")),
+            new("Png (.png)", () => ImageZipExporterAsync(PngFormat.Instance,"png")),
+            new("Wad (.wad)", ImageWadExporterAsync),
+            new("TGA (.tga)", () => ImageZipExporterAsync(TgaFormat.Instance,"tga")),
+            new ("TIFF (.tiff)", () => ImageZipExporterAsync(TiffFormat.Instance,"tiff")),
+            new ("Gif (.gif)", () => ImageZipExporterAsync(GifFormat.Instance,"gif")),
+            new("Jpeg (.jpg)", () => ImageZipExporterAsync(JpegFormat.Instance,"jpg")),
+            new ("WebP (.webp)", () => ImageZipExporterAsync(WebpFormat.Instance,"webp"))
+        };
+    }
 
     protected override void OnParametersSet()
     {
@@ -75,6 +83,8 @@
             .Where(t => t is not null)
             .ToList()!;
     }
+
+
 
     public async Task ExportAsync()
     {
@@ -85,28 +95,13 @@
 
         try
         {
-
             var format = _format;
 
-            using var ms = new MemoryStream();
-
-            using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, true))
-            {
-
-                foreach (var texture in _textures)
-                {
-                    // Convert to image first
-                    using var image = BSPService.TextureToImage(texture, Palette, false, t => (t.Data, t.Width, t.Height));
-
-                    // Write to the zip
-                    var entry = zip.CreateEntry($"{texture.Name}.{format.Extension}", CompressionLevel.Fastest);
-                    using (var stream = entry.Open())
-                        await image.SaveAsync(stream, format.Format);
-                }
-            }
+            // Export it
+            var exported = await format.Exporter.Invoke();
 
             // Download file
-            await DownloadFileService.DownloadFileAsync($"{BSP.Name}_textures.zip", ms.ToArray());
+            await DownloadFileService.DownloadFileAsync(exported.Item1, exported.Item2);
 
             DialogService.Close(true);
         }
@@ -115,6 +110,55 @@
             _exporting = false;
         }
     }
+
+
+    private async Task<(string, byte[])> ImageWadExporterAsync()
+    {
+        using var ms = new MemoryStream();
+
+        WADFile wad = new WADFile();
+
+        foreach (var texture in _textures)
+        {
+            wad.Entries.Add(new()
+                {
+                    Name = texture.Name,
+                    Width = texture.Width,
+                    Height = texture.Height,
+                    Data1 = texture.Data,
+                    Data2 = texture.Data2,
+                    Data4 = texture.Data4,
+                    Data8 = texture.Data8
+                });
+        }
+
+        await wad.SaveAsync(ms);
+
+        return ($"{BSP.Name}.wad", ms.ToArray());
+    }
+
+    private async Task<(string, byte[])> ImageZipExporterAsync(IImageFormat imageFormat, string extension)
+    {
+        using var ms = new MemoryStream();
+
+        using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, true))
+        {
+            foreach (var texture in _textures)
+            {
+                // Convert to image first
+                using var image = BSPService.TextureToImage(texture, Palette, false, t => (t.Data, t.Width, t.Height));
+
+                // Write to the zip
+                var entry = zip.CreateEntry($"{texture.Name}.{extension}", CompressionLevel.Fastest);
+                using (var stream = entry.Open())
+                    await image.SaveAsync(stream, imageFormat);
+            }
+        }
+
+        return ($"{BSP.Name}_textures.zip", ms.ToArray());
+
+    }
+
 
     public static async Task<dynamic?> OpenAsync(DialogService dialogService, IBSPFileTextures bsp, ColorPalette palette)
     {

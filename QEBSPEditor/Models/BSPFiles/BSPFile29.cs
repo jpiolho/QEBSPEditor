@@ -6,6 +6,8 @@ namespace QEBSPEditor.Models.BSPFiles;
 
 public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFileTextures, IBSPSave, IBSPFileBSPX
 {
+    private static Encoding EntityEncoding = Encoding.GetEncoding("Windows-1252");
+
     public class Face : IBSPWriteable
     {
         public const int SizeOf = sizeof(ushort) * 4 + sizeof(int) * 2 + sizeof(byte) * 4;
@@ -221,7 +223,7 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
         for (var i = 0; i < ChunkHeader.SizeOf * 15; i++)
             writer.Write((byte)0);
 
-        WriteChunkAndHeader(writer, 0, Encoding.UTF8.GetBytes(Entities), new byte[] { 0 });
+        WriteChunkAndHeader(writer, 0, EntityEncoding.GetBytes(Entities), new byte[] { 0 });
         WriteChunkAndHeader(writer, 1, Planes);
         WriteChunkAndHeader(writer, 2, MipTex);
         WriteChunkAndHeader(writer, 3, Vertices);
@@ -339,7 +341,7 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
     {
         reader.BaseStream.Seek(header.Offset, SeekOrigin.Begin);
 
-        return Encoding.UTF8.GetString(reader.ReadBytes(header.Size - 1));
+        return EntityEncoding.GetString(reader.ReadBytes(header.Size - 1));
     }
 
     private static List<Face> ReadFaceChunk(ChunkHeader header, BinaryReader reader)

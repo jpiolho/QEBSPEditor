@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using QEBSPEditor.Services;
 using Radzen;
+using System.Text;
 using Tewr.Blazor.FileReader;
 
 namespace QEBSPEditor
@@ -27,6 +28,8 @@ namespace QEBSPEditor
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddFileReaderService(options => options.UseWasmSharedBuffer = true);
+
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             await builder.Build().RunAsync();
         }

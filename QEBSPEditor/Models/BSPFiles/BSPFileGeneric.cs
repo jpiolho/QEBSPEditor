@@ -5,6 +5,8 @@ namespace QEBSPEditor.Models.BSPFiles;
 
 public class BSPFileGeneric : BSPFileBase, IBSPFileEntities, IBSPSave
 {
+    private static readonly Encoding EntityEncoding = Encoding.GetEncoding("Windows-1252");
+
     public override BSPCapabilities Capabilities => BSPCapabilities.Entities | BSPCapabilities.Saveable;
 
 
@@ -27,11 +29,11 @@ public class BSPFileGeneric : BSPFileBase, IBSPFileEntities, IBSPSave
 
         var array = _originalBytes;
 
-        var idx = array.LocateFirst(Encoding.ASCII.GetBytes("\"worldspawn\""));
+        var idx = array.LocateFirst(EntityEncoding.GetBytes("\"worldspawn\""));
 
         if (idx == -1)
         {
-            idx = array.LocateFirst(Encoding.ASCII.GetBytes("\"origin\""));
+            idx = array.LocateFirst(EntityEncoding.GetBytes("\"origin\""));
 
             if (idx == -1)
                 throw new InvalidDataException("Could not find entities chunk");
@@ -72,7 +74,7 @@ public class BSPFileGeneric : BSPFileBase, IBSPFileEntities, IBSPSave
                         {
                             // Alright, this is probably it
                             stream.Seek(header.Offset, SeekOrigin.Begin);
-                            _entities = Encoding.ASCII.GetString(reader.ReadBytes(header.Size));
+                            _entities = EntityEncoding.GetString(reader.ReadBytes(header.Size));
                             _entitiesHeader = header;
                             _entitiesHeaderOffset = headerOffset;
                             return this;
@@ -96,7 +98,7 @@ public class BSPFileGeneric : BSPFileBase, IBSPFileEntities, IBSPSave
 
         // Lets append our own entities at the end
         var offset = stream.Position;
-        var entitiesAsBytes = Encoding.ASCII.GetBytes(_entities);
+        var entitiesAsBytes = EntityEncoding.GetBytes(_entities);
         writer.Write(entitiesAsBytes);
         writer.Write((char)0);
 

@@ -9,6 +9,7 @@ public class BSPFileBSP2 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSP
     /* BSP2 support. 32bits instead of shorts for everything (bboxes use floats) */
     private const string VersionHeader = "BSP2";
 
+    private static readonly Encoding EntityEncoding = Encoding.GetEncoding("Windows-1252");
     public class Face : IBSPWriteable
     {
         public const int SizeOf = sizeof(uint) * 4 + sizeof(int) * 2 + sizeof(byte) * 4;
@@ -300,7 +301,7 @@ public class BSPFileBSP2 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSP
         for (var i = 0; i < ChunkHeader.SizeOf * 15; i++)
             writer.Write((byte)0);
 
-        WriteChunkAndHeader(writer, 0, Encoding.UTF8.GetBytes(Entities), new byte[] { 0 });
+        WriteChunkAndHeader(writer, 0, EntityEncoding.GetBytes(Entities), new byte[] { 0 });
         WriteChunkAndHeader(writer, 1, Planes);
         WriteChunkAndHeader(writer, 2, MipTex);
         WriteChunkAndHeader(writer, 3, Vertices);
@@ -338,7 +339,7 @@ public class BSPFileBSP2 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSP
     {
         reader.BaseStream.Seek(header.Offset, SeekOrigin.Begin);
 
-        return Encoding.UTF8.GetString(reader.ReadBytes(header.Size - 1));
+        return EntityEncoding.GetString(reader.ReadBytes(header.Size - 1));
     }
 
     private static List<Face> ReadFaceChunk(ChunkHeader header, BinaryReader reader)

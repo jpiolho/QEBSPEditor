@@ -11,6 +11,8 @@ public class BSPFile2PSB : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSP
     */
     private const string VersionHeader = "2PSB";
 
+    private static readonly Encoding EntityEncoding = Encoding.GetEncoding("Windows-1252");
+
     public class Face : IBSPWriteable
     {
         public const int SizeOf = sizeof(uint) * 4 + sizeof(int) * 2 + sizeof(byte) * 4;
@@ -85,7 +87,7 @@ public class BSPFile2PSB : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSP
         for (var i = 0; i < ChunkHeader.SizeOf * 15; i++)
             writer.Write((byte)0);
 
-        WriteChunkAndHeader(writer, 0, Encoding.UTF8.GetBytes(Entities), new byte[] { 0 });
+        WriteChunkAndHeader(writer, 0, EntityEncoding.GetBytes(Entities), new byte[] { 0 });
         WriteChunkAndHeader(writer, 1, Planes);
         WriteChunkAndHeader(writer, 2, MipTex);
         WriteChunkAndHeader(writer, 3, Vertices);
@@ -179,7 +181,7 @@ public class BSPFile2PSB : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSP
     {
         reader.BaseStream.Seek(header.Offset, SeekOrigin.Begin);
 
-        return Encoding.UTF8.GetString(reader.ReadBytes(header.Size - 1));
+        return EntityEncoding.GetString(reader.ReadBytes(header.Size - 1));
     }
 
     private static List<Face> ReadFaceChunk(ChunkHeader header, BinaryReader reader)

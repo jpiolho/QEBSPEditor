@@ -21,4 +21,5 @@ Visit [https://jpiolho.github.io/QEBSPEditor/](https://jpiolho.github.io/QEBSPEd
 ## Roadmap
 - Improve theme compatibility
 - Help menu
+- Better compatibility with Quake special characters
 - Small screen / mobile friendly-UI (gotta edit those BSPs on the go 🤪)

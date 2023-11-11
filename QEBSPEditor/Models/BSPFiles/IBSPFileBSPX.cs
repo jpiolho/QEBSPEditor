@@ -1,6 +1,6 @@
 ﻿namespace QEBSPEditor.Models.BSPFiles;
 
-public interface IBSPFileBSPX
+public interface IBSPFileBSPX : IBSPFile
 {
     BSPX? BSPXChunk { get; set; }
 }

@@ -8,6 +8,7 @@
 @inject ApplicationSettingsService ApplicationSettingsService
 @inject ThemeService ThemeService
 @inject AlertDialogsService AlertDialogs
+@inject BSPService BSPService
 
 <RadzenDialog />
 <ApplicationSettingsWatcher SettingsChange="OnSettingsChangedAsync" />
@@ -16,7 +17,9 @@
     <Body>
         @if (_bsp is not null)
         {
-            <BSPEditor BSP="_bsp" />
+            <CascadingValue Value="_bsp">
+                <BSPEditor BSP="_bsp" />
+            </CascadingValue>
         }
     </Body>
 
@@ -33,7 +36,7 @@
 
         <EdSidebarMenu>
             <EdSidebarItem Text="Load..." Icon="file_upload" Click="OpenLoadDialogAsync" />
-            <EdSidebarItem Text="Save" Icon="file_download" Click="SaveAsync" Visible="@(_bsp?.Capabilities.HasFlag(BSPCapabilities.Saveable) ?? false)" />
+            <EdSidebarItem Text="Save" Icon="file_download" Click="() => BSPService.SaveAsync(_bsp!)" Visible="@(_bsp?.Capabilities.HasFlag(BSPCapabilities.Saveable) ?? false)" />
             <EdSidebarItem Text="Settings" Icon="settings" Click="() => SettingsDialog.OpenAsync(DialogService)" />
             <EdSidebarItem Text="About" Icon="contact_support" Click="() => AboutDialog.OpenAsync(DialogService)" />
         </EdSidebarMenu>
@@ -67,23 +70,6 @@
                 StateHasChanged();
                 await AlertDialogs.WarningAsync("Generic BSP loaded", "This BSP version is not supported by QEBSPEditor, however it was possible to load it as a \"Generic BSP\".\nThis is a best-effort feature and there's no guarantee of things actually working. Thread carefully.");
             }
-
         }
     }
-
-
-    private async Task SaveAsync()
-    {
-        if (_bsp is null)
-            throw new InvalidOperationException("No BSP loaded");
-
-        var bsp = (IBSPSave)_bsp;
-        using (var ms = new MemoryStream())
-        {
-            bsp.Save(ms);
-
-            await BlazorDownloadFileService.DownloadFileAsync($"{_bsp.Name}.bsp", ms.ToArray());
-        }
-    }
-
 }

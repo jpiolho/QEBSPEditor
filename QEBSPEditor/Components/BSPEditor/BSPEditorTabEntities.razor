@@ -3,6 +3,7 @@
 @using CurrieTechnologies.Razor.SweetAlert2;
 @inject ApplicationSettingsService ApplicationSettingsService
 @inject IJSRuntime JSRuntime
+@inject BSPService BSPService
 
 <div class="d-flex flex-column h-100">
     <RadzenCard class="mt-2 flex-grow-1">
@@ -13,6 +14,8 @@
                         <RadzenMenuItem Text="Add Entity" Icon="add_circle" Click="AddEntity" />
                         <RadzenMenuItem Text="Prettify" Icon="format_indent_increase" Click="() => BSP.Entities = EntTools.Prettify(BSP.Entities)" />
                         <RadzenMenuItem Text="Minify" Icon="minimize" Click="() => BSP.Entities = EntTools.Minify(BSP.Entities)" />
+                        <RadzenMenuItem Text="Export (.ent)" Icon="download" Click="() => BSPService.ExportEntFileAsync(BSP)"/>
+                        @* <RadzenMenuItem Text="Import (.ent)" Icon="upload" /> *@
                     </RadzenMenu>
 
                     <div class="d-flex h-100">

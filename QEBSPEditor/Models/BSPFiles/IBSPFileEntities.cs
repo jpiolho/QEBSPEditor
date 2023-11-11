@@ -1,6 +1,6 @@
 ﻿namespace QEBSPEditor.Models.BSPFiles;
 
-public interface IBSPFileEntities
+public interface IBSPFileEntities : IBSPFile
 {
     string Entities { get; set; }
 }

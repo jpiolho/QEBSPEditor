@@ -23,6 +23,7 @@ namespace QEBSPEditor
             builder.Services.AddScoped<TooltipService>();
             builder.Services.AddScoped<ApplicationSettingsService>();
             builder.Services.AddScoped<ThemeService>();
+            builder.Services.AddScoped<BSPService>();
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddFileReaderService(options => options.UseWasmSharedBuffer = true);

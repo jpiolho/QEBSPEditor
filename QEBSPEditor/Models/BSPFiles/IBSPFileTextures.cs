@@ -1,6 +1,6 @@
 ﻿namespace QEBSPEditor.Models.BSPFiles;
 
-public interface IBSPFileTextures
+public interface IBSPFileTextures : IBSPFile
 {
     List<IBSPTexture?> Textures { get; set; }
 }

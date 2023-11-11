@@ -4,8 +4,12 @@
 @inject ILogger<BSPEditorTabEntitiesUI> Logger
 @inject DialogService DialogService
 @inject AlertDialogsService AlertDialogs
+@inject BSPService BSPService
 
-<RadzenButton Text="Add new entity" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Success" class="mb-4" Click="AddNewEntityAsync" />
+<div class="d-flex mb-4">
+<RadzenButton Text="Add new entity" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Success" Click="AddNewEntityAsync" />
+<RadzenButton Text="Export as .ent" Icon="download" ButtonStyle="ButtonStyle.Primary" class="ml-4" Click="() => BSPService.ExportEntFileAsync(BSP)" />
+</div>
 
 <RadzenDataGrid @ref="_table" TItem="Entity"
                 Data="_entitiesEditor.Entities"

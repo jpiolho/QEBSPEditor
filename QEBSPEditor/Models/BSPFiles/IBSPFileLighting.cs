@@ -1,6 +1,6 @@
 ﻿namespace QEBSPEditor.Models.BSPFiles;
 
-public interface IBSPFileLighting
+public interface IBSPFileLighting : IBSPFile
 {
     byte[] Lightmaps { get; set; }
 }

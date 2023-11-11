@@ -15,36 +15,35 @@
 @inject IBlazorDownloadFileService DownloadFileService
 @inject DialogService DialogService
 
-<div class="container-fluid">
-    <div class="row justify-content-center mb-4">
-        <div class="col-auto">
-            You are about to export @($"{_textures.Count} texture{(_textures.Count > 1 ? "s" : "")}")
+<EdDialogLayout>
+    <Body>
+        <div class="row justify-content-center mb-4">
+            <div class="col-auto">
+                You are about to export @($"{_textures.Count} texture{(_textures.Count > 1 ? "s" : "")}")
+            </div>
         </div>
-    </div>
-    <div class="row justify-content-center align-items-center">
-        <div class="col-sm-auto">
-            Format:
+        <div class="row justify-content-center align-items-center">
+            <div class="col-sm-auto">
+                Format:
+            </div>
+            <div class="col-sm-auto text-center">
+                <RadzenDropDown Data="@_imageFormats"
+                                TValue="@(ImageFormat)"
+                                AllowClear="false"
+                @bind-Value="@_format"
+                                TextProperty="@(nameof(ImageFormat.Name))"
+                                class="w-100" />
+            </div>
         </div>
-        <div class="col-sm-auto text-center">
-            <RadzenDropDown Data="@_imageFormats"
-                            TValue="@(ImageFormat)"
-                            AllowClear="false"
-            @bind-Value="@_format"
-                            TextProperty="@(nameof(ImageFormat.Name))"
-                            class="w-100" />
+    </Body>
+    <Footer>
+        <div class="row justify-content-end">
+            <div class="col-sm-auto">
+                <RadzenButton Text="Export" Click="ExportAsync" IsBusy="_exporting" Disabled="IsExportButtonDisabled" class="w-100" />
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <hr />
-        </div>
-    </div>
-    <div class="row justify-content-end">
-        <div class="col-sm-auto">
-            <RadzenButton Text="Export" Click="ExportAsync" IsBusy="_exporting" Disabled="IsExportButtonDisabled" class="w-100" />
-        </div>
-    </div>
-</div>
+    </Footer>
+</EdDialogLayout>
 
 @code {
     private delegate Task<(string, byte[])> ImageExporterDelegate();

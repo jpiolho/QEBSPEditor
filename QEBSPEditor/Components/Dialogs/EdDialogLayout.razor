@@ -1,0 +1,27 @@
+﻿<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            @Body
+        </div>
+    </div>
+
+    @if (Footer is not null)
+    {
+        <div class="row">
+            <div class="col">
+                <hr />
+            </div>
+        </div>
+        <div class="row justify-content-end">
+            <div class="col">
+                @Footer
+            </div>
+        </div>
+    }
+</div>
+
+
+@code {
+    [Parameter] public RenderFragment? Body { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+}

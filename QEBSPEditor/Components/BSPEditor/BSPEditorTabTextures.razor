@@ -78,7 +78,7 @@
         if (_palette is null)
             throw new InvalidOperationException("Cannot edit a texture without a palette");
 
-        var result = await TextureEdit.OpenAsync(DialogService, texture, _palette);
+        var result = await TextureEditDialog.OpenAsync(DialogService, texture, _palette);
         if (result is not null)
             await _table!.UpdateRow(texture);
     }

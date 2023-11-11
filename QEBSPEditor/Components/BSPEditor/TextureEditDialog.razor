@@ -115,10 +115,10 @@
 
     public static async Task<dynamic?> OpenAsync(DialogService dialogService, IBSPTexture texture, ColorPalette palette)
     {
-        return await dialogService.OpenAsync<TextureEdit>("Edit texture", new()
+        return await dialogService.OpenAsync<TextureEditDialog>("Edit texture", new()
         {
-            { nameof(TextureEdit.Texture), texture },
-            { nameof(TextureEdit.Palette), palette }
+            { nameof(TextureEditDialog.Texture), texture },
+            { nameof(TextureEditDialog.Palette), palette }
         }, new() { CloseDialogOnEsc = true, ShowClose = true, Width = "50%" });
     }
 }

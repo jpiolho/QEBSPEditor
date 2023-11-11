@@ -1,5 +1,6 @@
 ﻿using Blazor.DownloadFileFast.Interfaces;
 using QEBSPEditor.Core.Exceptions;
+using QEBSPEditor.Models;
 using QEBSPEditor.Models.BSPFiles;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -80,6 +81,38 @@ public class BSPService
         var bspEntities = GetBSPCapability<IBSPFileEntities>(bspFile);
 
         bspEntities.Entities = contents;
+    }
+
+
+    public Image<Rgb24> TextureToImage(IBSPTexture texture, ColorPalette palette, bool onlyFullbrights, Func<IBSPTexture, (byte[] data,int width,int height)> dataSelector)
+    {
+        var (data, width, height) = dataSelector(texture);
+
+        Span<Rgb24> colorData = stackalloc Rgb24[data.Length];
+
+        if (!onlyFullbrights)
+        {
+            for (var i = 0; i < data.Length; i++)
+                colorData[i] = palette.GetColor(data[i]).ToPixel<Rgb24>();
+        }
+        else
+        {
+            // Filter by fullbrights
+            for (var i = 0; i < data.Length; i++)
+            {
+                var index = data[i];
+                Color color;
+
+                if (index >= palette.FullBrightStart && index <= palette.FullBrightEnd)
+                    color = palette.GetColor(index);
+                else
+                    color = Color.Black;
+
+                colorData[i] = color.ToPixel<Rgb24>();
+            }
+        }
+
+        return Image.LoadPixelData<Rgb24>(colorData, width, height);
     }
 
 

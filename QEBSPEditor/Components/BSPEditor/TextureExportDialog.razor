@@ -1,0 +1,128 @@
+﻿@using Blazor.DownloadFileFast.Interfaces;
+@using SixLabors.ImageSharp.Formats;
+@using SixLabors.ImageSharp.Formats.Bmp;
+@using SixLabors.ImageSharp.Formats.Gif;
+@using SixLabors.ImageSharp.Formats.Png;
+@using SixLabors.ImageSharp.Formats.Tiff;
+@using SixLabors.ImageSharp.Formats.Jpeg;
+@using SixLabors.ImageSharp.Formats.Tga;
+@using SixLabors.ImageSharp.Formats.Webp;
+@using System.Diagnostics;
+@using System.IO.Compression;
+@using System.Diagnostics.CodeAnalysis;
+@inject BSPService BSPService
+@inject IBlazorDownloadFileService DownloadFileService
+@inject DialogService DialogService
+
+<div class="container-fluid">
+    <div class="row justify-content-center mb-4">
+        <div class="col-auto">
+            You are about to export @($"{_textures.Count} texture{(_textures.Count > 1 ? "s" : "")}")
+        </div>
+    </div>
+    <div class="row justify-content-center align-items-center">
+        <div class="col-sm-auto">
+            Format:
+        </div>
+        <div class="col-sm-auto text-center">
+            <RadzenDropDown Data="@ImageFormats"
+                            TValue="@(ImageFormat)"
+                            AllowClear="false"
+                            @bind-Value="@_format"
+                            TextProperty="@(nameof(ImageFormat.Name))"
+                            class="w-100" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <hr/>
+        </div>
+    </div>
+    <div class="row justify-content-end">
+        <div class="col-sm-auto">
+            <RadzenButton Text="Export" Click="ExportAsync" IsBusy="_exporting" Disabled="IsExportButtonDisabled" class="w-100" />
+        </div>
+    </div>
+</div>
+
+@code {
+    private record ImageFormat(string Name, string Extension, IImageFormat Format) { }
+
+    [Parameter] public IBSPFileTextures BSP { get; set; } = default!;
+    [Parameter] public ColorPalette Palette { get; set; } = default!;
+
+    private List<IBSPTexture> _textures = default!;
+    private ImageFormat? _format;
+    private bool _exporting;
+
+    [MemberNotNullWhen(false,nameof(_format))]
+    private bool IsExportButtonDisabled => _format is null || _exporting;
+
+    private static IEnumerable<ImageFormat> ImageFormats = new ImageFormat[]
+    {
+        new("Bitmap (.bmp)", "bmp", BmpFormat.Instance),
+        new("Png (.png)","png", PngFormat.Instance),
+        new("TGA (.tga)","tga", TgaFormat.Instance),
+        new ("Gif (.gif)","gif", GifFormat.Instance),
+        new ("TIFF (.tiff)","tiff", TiffFormat.Instance),
+        new("Jpeg (.jpg)", "jpg", JpegFormat.Instance),
+        new ("WebP (.webp)","webp", WebpFormat.Instance)
+    };
+
+    protected override void OnParametersSet()
+    {
+        _textures = BSP.Textures
+            .Where(t => t is not null)
+            .ToList()!;
+    }
+
+    public async Task ExportAsync()
+    {
+        if (IsExportButtonDisabled)
+            return;
+
+        _exporting = true;
+
+        try
+        {
+
+            var format = _format;
+
+            using var ms = new MemoryStream();
+
+            using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, true))
+            {
+
+                foreach (var texture in _textures)
+                {
+                    // Convert to image first
+                    using var image = BSPService.TextureToImage(texture, Palette, false, t => (t.Data, t.Width, t.Height));
+
+                    // Write to the zip
+                    var entry = zip.CreateEntry($"{texture.Name}.{format.Extension}", CompressionLevel.Fastest);
+                    using (var stream = entry.Open())
+                        await image.SaveAsync(stream, format.Format);
+                }
+            }
+
+            // Download file
+            await DownloadFileService.DownloadFileAsync($"{BSP.Name}_textures.zip", ms.ToArray());
+
+            DialogService.Close(true);
+        }
+        finally
+        {
+            _exporting = false;
+        }
+    }
+
+    public static async Task<dynamic?> OpenAsync(DialogService dialogService, IBSPFileTextures bsp, ColorPalette palette)
+    {
+        return await dialogService.OpenAsync<TextureExportDialog>("Export textures", new()
+        {
+            { nameof(TextureExportDialog.BSP), bsp },
+            { nameof(TextureExportDialog.Palette), palette }
+        }, new() { CloseDialogOnEsc = true, ShowClose = true, Width = "50%" });
+    }
+
+}

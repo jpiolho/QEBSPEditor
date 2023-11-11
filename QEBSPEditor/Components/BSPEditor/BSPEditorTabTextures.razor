@@ -2,7 +2,10 @@
 @using SixLabors.ImageSharp.Formats.Png;
 @inject DialogService DialogService
 
-<div>Palette: <ColorPaletteDropdown @bind-ColorPalette="_palette" /></div>
+<div class="d-flex mb-4 gap-2">
+    <div>Palette: <ColorPaletteDropdown @bind-ColorPalette="_palette" /></div>
+    <RadzenButton Text="Export textures..." Icon="download" Disabled="@(_palette is null)" ButtonStyle="ButtonStyle.Primary" Click="() => TextureExportDialog.OpenAsync(DialogService,BSP , _palette)" />
+</div>
 
 @if (_palette is null)
 {

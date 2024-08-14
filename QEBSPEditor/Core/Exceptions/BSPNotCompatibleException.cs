@@ -15,8 +15,4 @@ public class BSPNotCompatibleException : Exception
     public BSPNotCompatibleException(string? message, Exception? innerException) : base(message, innerException)
     {
     }
-
-    protected BSPNotCompatibleException(SerializationInfo info, StreamingContext context) : base(info, context)
-    {
-    }
 }

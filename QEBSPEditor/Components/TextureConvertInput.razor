@@ -1,4 +1,7 @@
 ﻿@using QEBSPEditor.Core.Extensions;
+@using SixLabors.ImageSharp
+@using SixLabors.ImageSharp.PixelFormats
+@using SixLabors.ImageSharp.Processing
 @using SixLabors.ImageSharp.Processing.Processors.Quantization;
 @using System.Text;
 @inject AlertDialogsService AlertDialogs
@@ -120,7 +123,7 @@
         await SetProgressAsync("Quantizing...");
         var quantizer = new PaletteQuantizer(AvoidFullbright ? Palette.GetAllColorsWithoutFullbright() : Palette.GetAllColors());
         image.Mutate(context => context.Quantize(quantizer));
-
+        
         await SetProgressAsync("Converting to palette...");
         previewTexture.Data = image.ConvertToPalette(Palette);
 

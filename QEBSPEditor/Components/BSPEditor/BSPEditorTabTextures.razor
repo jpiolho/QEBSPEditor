@@ -4,7 +4,7 @@
 
 <div class="d-flex mb-4 gap-2">
     <div>Palette: <ColorPaletteDropdown @bind-ColorPalette="_palette" /></div>
-    <RadzenButton Text="Export textures..." Icon="download" Disabled="@(_palette is null)" ButtonStyle="ButtonStyle.Primary" Click="(() => { if(_pallete is not null) { TextureExportDialog.OpenAsync(DialogService,BSP , _palette); })" />
+    <RadzenButton Text="Export textures..." Icon="download" Disabled="@(_palette is null)" ButtonStyle="ButtonStyle.Primary" Click="(async () => { if(_palette is not null) { await TextureExportDialog.OpenAsync(DialogService,BSP , _palette); }})" />
 </div>
 
 @if (_palette is null)

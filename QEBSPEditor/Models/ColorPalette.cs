@@ -1,4 +1,6 @@
-﻿namespace QEBSPEditor.Models;
+﻿using SixLabors.ImageSharp;
+
+namespace QEBSPEditor.Models;
 
 public class ColorPalette : ICloneable
 {

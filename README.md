@@ -1,4 +1,5 @@
 # QEBSPEditor
+[![Discord](https://img.shields.io/discord/1292432185718079552?color=%237289da&label=Discord)](https://discord.gg/rbJY9u55Tu)
 
 A browser tool to edit BSPs for Quake Enhanced and other versions.
 

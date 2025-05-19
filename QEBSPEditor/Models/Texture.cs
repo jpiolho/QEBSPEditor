@@ -1,6 +1,6 @@
 ﻿namespace QEBSPEditor.Models;
 
-public interface IBSPTexture
+public interface IBSPTexture : ICloneable
 {
     string Name { get; set; }
     int Width { get; set; }

@@ -65,14 +65,14 @@
     {
         _imageFormats = new ImageFormat[]
         {
-            new("Bitmap (.bmp)", () => ImageZipExporterAsync(BmpFormat.Instance,"bmp")),
-            new("Png (.png)", () => ImageZipExporterAsync(PngFormat.Instance,"png")),
+            new("Bitmap (.bmp)", () => ImageZipExporterAsync(new BmpEncoder(),"bmp")),
+            new("Png (.png)", () => ImageZipExporterAsync(new PngEncoder(),"png")),
             new("Wad2 Quake (.wad)", ImageWadExporterAsync),
-            new("TGA (.tga)", () => ImageZipExporterAsync(TgaFormat.Instance,"tga")),
-            new("TIFF (.tiff)", () => ImageZipExporterAsync(TiffFormat.Instance,"tiff")),
-            new("Gif (.gif)", () => ImageZipExporterAsync(GifFormat.Instance,"gif")),
-            new("Jpeg (.jpg)", () => ImageZipExporterAsync(JpegFormat.Instance,"jpg")),
-            new("WebP (.webp)", () => ImageZipExporterAsync(WebpFormat.Instance,"webp"))
+            new("TGA (.tga)", () => ImageZipExporterAsync(new TgaEncoder(),"tga")),
+            new("TIFF (.tiff)", () => ImageZipExporterAsync(new TiffEncoder(),"tiff")),
+            new("Gif (.gif)", () => ImageZipExporterAsync(new GifEncoder(),"gif")),
+            new("Jpeg (.jpg)", () => ImageZipExporterAsync(new JpegEncoder(),"jpg")),
+            new("WebP (.webp)", () => ImageZipExporterAsync(new WebpEncoder(),"webp"))
         };
     }
 
@@ -136,7 +136,7 @@
         return ($"{BSP.Name}.wad", ms.ToArray());
     }
 
-    private async Task<(string, byte[])> ImageZipExporterAsync(IImageFormat imageFormat, string extension)
+    private async Task<(string, byte[])> ImageZipExporterAsync(IImageEncoder imageEncoder, string extension)
     {
         using var ms = new MemoryStream();
 
@@ -146,11 +146,11 @@
             {
                 // Convert to image first
                 using var image = BSPService.TextureToImage(texture, Palette, false, t => (t.Data, t.Width, t.Height));
-
+                
                 // Write to the zip
                 var entry = zip.CreateEntry($"{texture.Name}.{extension}", CompressionLevel.Fastest);
                 using (var stream = entry.Open())
-                    await image.SaveAsync(stream, imageFormat);
+                    await image.SaveAsync(stream, imageEncoder);
             }
         }
 

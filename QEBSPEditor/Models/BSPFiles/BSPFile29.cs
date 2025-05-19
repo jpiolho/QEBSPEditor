@@ -85,6 +85,8 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
             return tex;
         }
 
+        
+
         public void Write(BinaryWriter writer)
         {
             var offsetBase = writer.BaseStream.Position;
@@ -117,11 +119,25 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
                 writer.Write((int)ofs8);
             }
         }
+
+        public override object Clone()
+        {
+            return new MipTexture()
+            {
+                Name = this.Name,
+                Data = (byte[])this.Data.Clone(),
+                Data2 = (byte[])this.Data2.Clone(),
+                Data4 = (byte[])this.Data4.Clone(),
+                Data8 = (byte[])this.Data8.Clone(),
+                Width = this.Width,
+                Height = this.Height,
+            };
+        }
     }
 
     public class MipTextures : IBSPWriteable
     {
-        public List<MipTexture?> Textures { get; set; } = new();
+        public List<IBSPTexture?> Textures { get; set; } = new();
 
         public static MipTextures Read(BinaryReader reader)
         {
@@ -133,7 +149,7 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
             for (var i = 0; i < count; i++)
                 offsets.Add(reader.ReadInt32());
 
-            var textures = new List<MipTexture?>(count);
+            var textures = new List<IBSPTexture?>(count);
             for (var i = 0; i < count; i++)
             {
                 if (offsets[i] == -1)
@@ -166,10 +182,10 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
             for (var i = 0; i < Textures.Count; i++)
             {
                 var texture = Textures[i];
-                if (texture is not null)
+                if (texture is not null && texture is MipTexture mip)
                 {
                     offsets.Add(writer.BaseStream.Position - offsetBase);
-                    texture.Write(writer);
+                    mip.Write(writer);
                 }
                 else
                 {
@@ -212,7 +228,7 @@ public class BSPFile29 : BSPFileBase, IBSPFileEntities, IBSPFileLighting, IBSPFi
 
     public override string VersionName => "29";
 
-    public List<IBSPTexture?> Textures { get => MipTex.Textures.Cast<IBSPTexture?>().ToList(); set => throw new NotSupportedException(); }
+    public List<IBSPTexture?> Textures { get => MipTex.Textures; set => throw new NotSupportedException(); }
     public BSPX? BSPXChunk { get; set; }
 
     public void Save(Stream stream)

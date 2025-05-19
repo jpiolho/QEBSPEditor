@@ -1,4 +1,7 @@
 ﻿@using QEBSPEditor.Core.Extensions;
+@using SixLabors.ImageSharp
+@using SixLabors.ImageSharp.PixelFormats
+@using SixLabors.ImageSharp.Processing
 @using SixLabors.ImageSharp.Processing.Processors.Quantization;
 @using System.Text;
 @inject AlertDialogsService AlertDialogs
@@ -8,10 +11,10 @@
     @if (_loadingProgress is null && Texture is not null)
     {
         <BSPTexture Texture="@Texture" 
-            Palette="@Palette" 
-            Style="@GetWidthHeightStyle()" 
-            OnlyShowFullbright="@OnlyShowFullbright"
-            View="@View" 
+        Palette="@Palette" 
+        Style="@GetWidthHeightStyle()" 
+        OnlyShowFullbright="@OnlyShowFullbright"
+        View="@View" 
         />
     }
     else
@@ -54,6 +57,11 @@
         public byte[] Data2 { get; set; } = Array.Empty<byte>();
         public byte[] Data4 { get; set; } = Array.Empty<byte>();
         public byte[] Data8 { get; set; } = Array.Empty<byte>();
+
+        public object Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     private string? _loadingProgress;
@@ -120,7 +128,7 @@
         await SetProgressAsync("Quantizing...");
         var quantizer = new PaletteQuantizer(AvoidFullbright ? Palette.GetAllColorsWithoutFullbright() : Palette.GetAllColors());
         image.Mutate(context => context.Quantize(quantizer));
-
+        
         await SetProgressAsync("Converting to palette...");
         previewTexture.Data = image.ConvertToPalette(Palette);
 

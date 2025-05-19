@@ -15,9 +15,5 @@ namespace QEBSPEditor.Core.Exceptions
         public BSPNotLoadedException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
-
-        protected BSPNotLoadedException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

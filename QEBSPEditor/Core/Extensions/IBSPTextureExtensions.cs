@@ -1,4 +1,6 @@
 ﻿using QEBSPEditor.Models;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace QEBSPEditor.Core.Extensions;
 

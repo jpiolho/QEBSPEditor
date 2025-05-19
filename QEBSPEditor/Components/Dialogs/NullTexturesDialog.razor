@@ -1,0 +1,62 @@
+﻿<div>
+    @for (var i = 0; i < BSP.Textures.Count; i++)
+    {
+        @if (BSP.Textures[i] is not null)
+            continue;
+
+        var localI = i;
+
+        <div class="row">
+            <div class="col">
+                @i
+            </div>
+            <div class="col">
+                <RadzenDropDown
+                TValue="IBSPTexture"
+                Value="@(_replacements.TryGetValue(localI,out var v) ? v : null)"
+                ValueChanged="@((value) => _replacements[localI] = value)"
+                Data="_validTextures"
+                >
+                    <Template>
+                        @context.Name
+                    </Template>
+                </RadzenDropDown>
+            </div>
+            <div class="col">
+                <RadzenButton Click="@(() => ReplaceTexture(localI, _replacements[localI]))">Clone & Replace</RadzenButton>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public IBSPFileTextures BSP { get; set; } = default!;
+
+
+    private Dictionary<int, IBSPTexture> _replacements = new();
+
+    private IEnumerable<IBSPTexture> _validTextures = default!;
+
+    protected override void OnInitialized()
+    {
+        _validTextures = BSP.Textures.Where(t => t is not null)!;
+    }
+
+    private void ReplaceTexture(int index, IBSPTexture target)
+    {
+        var clone = (IBSPTexture)target.Clone();
+        clone.Name = $"null_{index}";
+
+        BSP.Textures[index] = clone;
+
+        StateHasChanged();
+    }
+
+    public static async Task<dynamic?> OpenAsync(DialogService dialogService, IBSPFileTextures bsp)
+    {
+        return await dialogService.OpenAsync<NullTexturesDialog>("Replace null textures", new()
+        {
+            { nameof(TextureExportDialog.BSP), bsp },
+        }, new() { CloseDialogOnEsc = true, ShowClose = true, Width = "50%" });
+    }
+}

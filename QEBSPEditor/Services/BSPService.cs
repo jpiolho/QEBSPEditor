@@ -2,6 +2,8 @@
 using QEBSPEditor.Core.Exceptions;
 using QEBSPEditor.Models;
 using QEBSPEditor.Models.BSPFiles;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace QEBSPEditor.Services;
 

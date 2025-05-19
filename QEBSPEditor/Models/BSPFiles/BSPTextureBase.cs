@@ -15,5 +15,7 @@ public abstract class BSPTextureBase : IBSPTexture
     public byte[] Data4 { get => _data4; set => _data4 = value; }
     public byte[] Data8 { get => _data4; set => _data8 = value; }
 
+    public abstract object Clone();
+
     public override int GetHashCode() => HashCode.Combine(Name, Width, Height, Data, Data2, Data4, Data8);
 }

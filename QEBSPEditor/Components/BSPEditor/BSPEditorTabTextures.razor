@@ -5,6 +5,7 @@
 <div class="d-flex mb-4 gap-2">
     <div>Palette: <ColorPaletteDropdown @bind-ColorPalette="_palette" /></div>
     <RadzenButton Text="Export textures..." Icon="download" Disabled="@(_palette is null)" ButtonStyle="ButtonStyle.Primary" Click="(async () => { if(_palette is not null) { await TextureExportDialog.OpenAsync(DialogService,BSP , _palette); }})" />
+    <RadzenButton Text="Replace null textures... (experimental)" Icon="change_circle" ButtonStyle="ButtonStyle.Primary" Click="@OnReplaceNullTexturesClickAsync" />
 </div>
 
 @if (_palette is null)
@@ -16,13 +17,13 @@
 }
 
 <RadzenDataGrid @ref="_table" TItem="IBSPTexture"
-                Data="_data"
-                PagerPosition="PagerPosition.TopAndBottom"
-                AllowPaging="true"
-                AllowSorting="true"
-                AllowFiltering="true"
-                AllowColumnPicking="true"
-                AllowColumnResize="true">
+Data="_data"
+PagerPosition="PagerPosition.TopAndBottom"
+AllowPaging="true"
+AllowSorting="true"
+AllowFiltering="true"
+AllowColumnPicking="true"
+AllowColumnResize="true">
     <Columns>
         <RadzenDataGridColumn TItem="IBSPTexture" Visible="false" Title="#" Sortable="false" Filterable="false">
             <Template>
@@ -70,6 +71,11 @@
 
     protected override void OnParametersSet()
     {
+        ReloadData();
+    }
+
+    private void ReloadData()
+    {
         _data = BSP?.Textures.Where(t => t is not null).ToList();
     }
 
@@ -81,5 +87,15 @@
         var result = await TextureEditDialog.OpenAsync(DialogService, texture, _palette);
         if (result is not null)
             await _table!.UpdateRow(texture);
+    }
+
+    private async Task OnReplaceNullTexturesClickAsync()
+    {
+        await NullTexturesDialog.OpenAsync(DialogService, BSP);
+
+        ReloadData();
+        StateHasChanged();
+
+        await _table!.Reload();
     }
 }

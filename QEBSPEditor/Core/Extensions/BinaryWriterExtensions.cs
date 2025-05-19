@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Numerics;
+using System.Text;
 
 namespace QEBSPEditor.Core.Extensions;
 
@@ -19,5 +20,12 @@ public static class BinaryWriterExtensions
         // Pad the remaining with zeros
         for (var i = array.Length; i < len; i++)
             writer.Write((byte)0);
+    }
+
+    public static void Write(this BinaryWriter writer, Vector3 vector)
+    {
+        writer.Write(vector.X);
+        writer.Write(vector.Y);
+        writer.Write(vector.Z);
     }
 }

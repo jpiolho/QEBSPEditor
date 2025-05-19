@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Numerics;
+using System.Text;
 
 namespace QEBSPEditor.Core.Extensions;
 
@@ -16,5 +17,14 @@ public static class BinaryReaderExtensions
         }
 
         return Encoding.ASCII.GetString(bytes, 0, size);
+    }
+
+    public static Vector3 ReadVector3(this BinaryReader reader)
+    {
+        return new Vector3(
+            reader.ReadSingle(),
+            reader.ReadSingle(),
+            reader.ReadSingle()
+        );
     }
 }

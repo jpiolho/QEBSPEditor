@@ -11,10 +11,10 @@
     @if (_loadingProgress is null && Texture is not null)
     {
         <BSPTexture Texture="@Texture" 
-            Palette="@Palette" 
-            Style="@GetWidthHeightStyle()" 
-            OnlyShowFullbright="@OnlyShowFullbright"
-            View="@View" 
+        Palette="@Palette" 
+        Style="@GetWidthHeightStyle()" 
+        OnlyShowFullbright="@OnlyShowFullbright"
+        View="@View" 
         />
     }
     else
@@ -57,6 +57,11 @@
         public byte[] Data2 { get; set; } = Array.Empty<byte>();
         public byte[] Data4 { get; set; } = Array.Empty<byte>();
         public byte[] Data8 { get; set; } = Array.Empty<byte>();
+
+        public object Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     private string? _loadingProgress;
